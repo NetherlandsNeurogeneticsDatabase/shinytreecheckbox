@@ -2,23 +2,40 @@
 #'
 #' Creates the checkboxes.
 #'
+#' @param id The \code{input} slot that will be used to access the value.
+#' @param label The label that will be displayed in front. If \code{NULL} is provided, no label will be generated.
+#' @param choices A dataframe which will be used to generate the checkboxes.
+#' @param levels A vector which contains the columnames that will be used to create the hierarchical data. From large to small groups.
+#' @param collapsed Logical; If \code{TRUE} checkboxes will be collapsed on render.
+#' @param selected A vector containing the values of which checkboxes will default as checked.
+#' @examples
+#' library(shiny)
+#' library(shinytreecheckbox)
+#' choices = data.frame(order = c("Primates", "Primates", "Primates", "Primates", "Primates", "Carnivora", "Carnivora", "Birds", "Birds", "Birds", "Fish", "Fish", "Fish"), genus = c("Baboons", "Capuchin monkeys", "Chimpanzees", "Gorillas", "Mandrills", "Seals", "Candids", "Chiroxiphia", "Montezuma oropendolas", "Pale chanting goshawks", "Cichlids", "Moon wrasse", "Mozambique tilapia"))
+#' ui <- fluidPage(
+#'  shinytreecheckbox::treecheckbox("thisisanid", "mytreecheckbox", choices, c("order", "genus"), T, NULL)
+#' )
+#' server <- function(input, output, session) {}
+#' shinyApp(ui, server)
+#'
 #' @import htmlwidgets
 #' @importFrom jsonlite toJSON
 #' @export
-treecheckbox <- function(id, label, choices, levels, collapsed = F, width = NULL, height = NULL) {
+treecheckbox <- function(id, label, choices, levels, collapsed, selected, width = NULL, height = NULL) {
 
   # forward options using x
-  x = list(
+  variables = list(
     label = label,
     choices = jsonlite::toJSON(choices),
     levels = jsonlite::toJSON(levels),
-    collapsed = jsonlite::toJSON(collapsed)
+    collapsed = jsonlite::toJSON(collapsed),
+    selected = jsonlite::toJSON(selected)
   )
 
   # create widget
   htmlwidgets::createWidget(
     name = 'treecheckbox',
-    x,
+    variables,
     width = NULL,
     height = NULL,
     package = 'shinytreecheckbox',

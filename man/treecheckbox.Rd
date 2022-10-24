@@ -9,11 +9,36 @@ treecheckbox(
   label,
   choices,
   levels,
+  collapsed,
+  selected,
   width = NULL,
-  height = NULL,
-  elementId = NULL
+  height = NULL
 )
+}
+\arguments{
+\item{id}{The \code{input} slot that will be used to access the value.}
+
+\item{label}{The label that will be displayed in front. If \code{NULL} is provided, no label will be generated.}
+
+\item{choices}{A dataframe which will be used to generate the checkboxes.}
+
+\item{levels}{A vector which contains the columnames that will be used to create the hierarchical data. From large to small groups.}
+
+\item{collapsed}{Logical; If \code{TRUE} checkboxes will be collapsed on render.}
+
+\item{selected}{A vector containing the values of which checkboxes will default as checked.}
 }
 \description{
 Creates the checkboxes.
+}
+\examples{
+library(shiny)
+library(shinytreecheckbox)
+choices = data.frame(order = c("Primates", "Primates", "Primates", "Primates", "Primates", "Carnivora", "Carnivora", "Birds", "Birds", "Birds", "Fish", "Fish", "Fish"), genus = c("Baboons", "Capuchin monkeys", "Chimpanzees", "Gorillas", "Mandrills", "Seals", "Candids", "Chiroxiphia", "Montezuma oropendolas", "Pale chanting goshawks", "Cichlids", "Moon wrasse", "Mozambique tilapia"))
+ui <- fluidPage(
+ shinytreecheckbox::treecheckbox("thisisanid", "mytreecheckbox", choices, c("order", "genus"), T, NULL)
+)
+server <- function(input, output, session) {}
+shinyApp(ui, server)
+
 }

@@ -6,7 +6,7 @@
 \alias{renderTreecheckbox}
 \title{Shiny bindings for treecheckbox}
 \usage{
-treecheckboxOutput(outputId, width = "100\%", height = "400px")
+treecheckboxOutput(outputId, width = NULL, height = NULL)
 
 renderTreecheckbox(expr, env = parent.frame(), quoted = FALSE)
 }
