@@ -9,6 +9,40 @@ let generateID = (function(n) {
         return n;
     }
 }(-1))
+function createCaret(){
+    let caret = document.createElement("span")
+    caret.classList.add(styles.groupedCheckboxCaret)
+    caret.innerText = "▼"
+    return(caret)
+}
+
+function createInputCheckbox(nodeName, nodeID) {
+    let inputCheckbox = document.createElement("input")
+    inputCheckbox.classList.add("grouped-checkbox-input", "form-check-input")
+    inputCheckbox.type = "checkbox"
+    inputCheckbox.value = nodeName
+    inputCheckbox.id = "node-input-check" + nodeID
+    return(inputCheckbox)
+}
+
+function createCheckboxLabel(nodeName, id){
+    let labelCheckbox = document.createElement("label")
+    labelCheckbox.classList.add("form-check-label")
+    labelCheckbox.for = "node-input-check" + id
+    labelCheckbox.innerHTML = nodeName
+    return(labelCheckbox)
+}
+
+function generateSelectButtons(){
+    let container = $("<div>", {"class": "flex-parent"})
+    container.append($("<button>", {"class": "flex-child grouped-checkbox-select-all btn btn-outline-fg",
+        "id": "grouped-checkbox-select-all-" + generateID()}).text("Select All"))
+    container.append($("<button>", {"class": "flex-child grouped-checkbox-deselect-all btn btn-outline-fg",
+        "id": "grouped-checkbox-deselect-all-" + generateID()}).text("Deselect All"))
+    return(container)
+}
+
+
 
 function hideListElement(element, animation){
     if (!animation){
@@ -143,39 +177,29 @@ function constructNode(nodeName, nodeParent, hasChildren){
 
     }
 
+    // Create ID for the nodes
     let nNodes = generateID()
-
     let newNodeID = "node-" + nNodes
 
     let nodeListElement = document.createElement("li")
 
 
-
+    // Create node and assign classes
     let node = document.createElement("span")
     node.classList.add("GroupedCheckBox-node", "text-fg")
     node.id = newNodeID
 
 
 
-    if (hasChildren){styles.groupedCheckboxCaret
-        let caret = document.createElement("span")
-        caret.classList.add(styles.groupedCheckboxCaret)
-        caret.innerText = "▼"
-        node.appendChild(caret)
+
+    if (hasChildren){
+        node.appendChild(createCaret())
     }
 
-    let inputCheckbox = document.createElement("input")
-    inputCheckbox.classList.add("grouped-checkbox-input", "form-check-input")
-    inputCheckbox.type = "checkbox"
-    inputCheckbox.value = nodeName
-    inputCheckbox.id = "node-input-check" + nNodes
-    node.appendChild(inputCheckbox)
 
-    let labelCheckbox = document.createElement("label")
-    labelCheckbox.classList.add("form-check-label")
-    labelCheckbox.for = "node-input-check" + nNodes
-    labelCheckbox.innerHTML = nodeName
-    node.appendChild(labelCheckbox)
+    // Add the checkbox and label component
+    node.appendChild(createInputCheckbox(nodeName, nNodes))
+    node.appendChild(createCheckboxLabel(nodeName, nNodes))
 
     if (hasChildren){
         let newList = document.createElement("ul")
@@ -190,35 +214,28 @@ function constructNode(nodeName, nodeParent, hasChildren){
     return newNodeID
 }
 
-function createTree(id, label, choices, levels, collapsed) {
+function createTree(id, label, choices, levels, collapsed, selected) {
     let base = document.getElementById(id)
 
     // Create label
-    let new_label = document.createElement("h4");
-    new_label.innerText = label;
-    base.appendChild(new_label)
-
+    if (label){
+        let new_label = document.createElement("h4");
+        new_label.innerText = label;
+        base.appendChild(new_label)
+    }
 
     // create select buttons
-
-    let container = $("<div>", {"class": "flex-parent"})
-    container.append($("<button>", {"class": "flex-child grouped-checkbox-select-all btn btn-outline-fg",
-        "id": "grouped-checkbox-select-all-" + generateID()}).text("Select All"))
-    container.append($("<button>", {"class": "flex-child grouped-checkbox-deselect-all btn btn-outline-fg",
-        "id": "grouped-checkbox-deselect-all-" + generateID()}).text("Deselect All"))
-
-    $("#" + id).append(container)
+    $("#" + id).append(generateSelectButtons)
 
 
     let tree = parseTree(choices, levels)
 
-
-    // Create container that will hold all the nodes
+    // Add a container that will hold all the nodes
     let nodeContainer = document.createElement("div")
     nodeContainer.classList.add(styles.groupedCheckboxNodeHolder)
     nodeContainer.classList.add("overflow-auto")
-
     base.appendChild(nodeContainer)
+
 
     // Render and append the nodes
     appendNodes(nodeContainer, tree)
@@ -229,6 +246,19 @@ function createTree(id, label, choices, levels, collapsed) {
         $("#" + id).find("." + styles.groupedCheckboxCaret).each(function (){
             hideListElement(this, "toggle")
         })
+    }
+
+    // Check which nodes should be selected
+    if (selected.length > 0){
+        for (const select of selected) {
+            let checkbox = $("#" + id).find(`input[type=checkbox][value=${select}]`)
+
+            // Check self
+            checkbox.attr("checked", "true")
+
+            // Check children
+            checkbox.siblings("ul").find(".grouped-checkbox-input").attr("checked", "true")
+        }
     }
 
 

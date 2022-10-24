@@ -10,7 +10,6 @@ class ConstructTree {
     buildTree(data, levels){
         let root = new Node("root")
         let newData
-        console.log(data, levels)
 
         data.forEach(record => {
             newData = []
