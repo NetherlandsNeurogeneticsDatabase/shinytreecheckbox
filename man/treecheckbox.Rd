@@ -9,8 +9,8 @@ treecheckbox(
   label,
   choices,
   levels,
-  collapsed,
-  selected,
+  collapsed = F,
+  selected = NULL,
   width = NULL,
   height = NULL
 )
@@ -36,7 +36,7 @@ library(shiny)
 library(shinytreecheckbox)
 choices = data.frame(order = c("Primates", "Primates", "Primates", "Primates", "Primates", "Carnivora", "Carnivora", "Birds", "Birds", "Birds", "Fish", "Fish", "Fish"), genus = c("Baboons", "Capuchin monkeys", "Chimpanzees", "Gorillas", "Mandrills", "Seals", "Candids", "Chiroxiphia", "Montezuma oropendolas", "Pale chanting goshawks", "Cichlids", "Moon wrasse", "Mozambique tilapia"))
 ui <- fluidPage(
- shinytreecheckbox::treecheckbox("thisisanid", "mytreecheckbox", choices, c("order", "genus"), T, NULL)
+ shinytreecheckbox::treecheckbox("thisisanid", "mytreecheckbox", choices, c("order", "genus"), T, c("Fish", "Gorillas"))
 )
 server <- function(input, output, session) {}
 shinyApp(ui, server)
