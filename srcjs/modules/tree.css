@@ -1,0 +1,21 @@
+/* Style the caret/arrow */
+:local .groupedCheckboxCaret {
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none; /* Prevent text selection */
+  display: inline-block;
+  margin-right: 6px;
+}
+
+:local .groupedCheckboxList {
+  list-style: none;
+}
+
+:local .groupedCheckboxNodeHolder {
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid #cccccc;
+  max-height: 25vh;
+}/*# sourceMappingURL=tree.css.map */

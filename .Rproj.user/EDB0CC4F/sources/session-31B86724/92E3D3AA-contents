@@ -1,0 +1,32 @@
+import 'widgets';
+import 'shiny';
+
+import {createTree} from "../modules/renderTree.js";
+
+HTMLWidgets.widget({
+
+  name: 'treecheckbox',
+
+  type: 'output',
+
+  factory: function(el, width, height) {
+
+    // TODO: define shared variables for this instance
+
+    return {
+
+      renderValue: function(x) {
+
+        // TODO: code to render the widget, e.g.
+        createTree(el.id, x.label, x.choices, x.levels)
+      },
+
+      resize: function(width, height) {
+
+        // TODO: code to re-render the widget with a new size
+
+      }
+
+    };
+  }
+});

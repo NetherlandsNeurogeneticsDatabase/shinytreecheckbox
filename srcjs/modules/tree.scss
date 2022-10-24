@@ -1,0 +1,19 @@
+
+/* Style the caret/arrow */
+:local .groupedCheckboxCaret {
+  cursor: pointer;
+  user-select: none; /* Prevent text selection */
+  display: inline-block;
+  margin-right: 6px;
+}
+
+:local .groupedCheckboxList{
+  list-style: none; // Remove dots
+}
+
+:local .groupedCheckboxNodeHolder{
+  background-color: #ffff;
+  border-radius: 8px;
+  border: 1px solid #cccccc;
+  max-height: 25vh;
+}
