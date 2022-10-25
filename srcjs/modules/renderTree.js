@@ -90,9 +90,7 @@ function setInput(id){
     $("#" + id).find("input:checkbox:checked").each(function(){
         selected.push($(this).val())
     })
-
-    console.log(`Setting id: ${id} too: ${selected}`)
-    Shiny.setInputValue(id, selected);
+    Shiny.setInputValue(id, selected, {priority: "event"});
 
 }
 
@@ -106,7 +104,7 @@ function registerEvents(id){
     })
 
     // if parent group checkbox get changed, so will children
-    base.find(".grouped-checkbox-input").change(function(){
+    base.find(".grouped-checkbox-input").on("click",function(){
         // Select all children and change prop checked
         let element = $(this)
         element.siblings("ul").children().find(".grouped-checkbox-input").prop("checked", element.is(":checked"))
@@ -128,7 +126,8 @@ function registerEvents(id){
         } else {
             // Intermediate should be set to false. Value checked can be grabbed by getting the value from the element
             parentCheckbox.prop({indeterminate: false, checked: element.is(":checked")})
-        }
+        }        
+        setInput(id)
     })
 
 
@@ -281,18 +280,6 @@ function createTree(id, label, choices, levels, collapsed, selected) {
     $(document).on("shiny:connected", function() {
         registerEvents(id)
     });
-
-    $( document ).on("shiny:sessioninitialized", function() {
-        $("#" + id).find(".grouped-checkbox-input").change(function() {
-        setInput(id);
-    });
-
-        // $("#" + id).find(".grouped-checkbox-input").change(function() {
-        //     e.stopPropagation();
-        //     setInput(id);
-        // });
-    })
-
 }
 
 
