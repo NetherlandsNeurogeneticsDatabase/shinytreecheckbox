@@ -174,12 +174,14 @@ function registerEvents(id){
     // Select all button
     base.find(".grouped-checkbox-select-all").on("click", function(){
         base.find(".grouped-checkbox-input").prop({indeterminate: false, checked: true})
+        setInput(id)
 
     })
 
     // Deselect all
     base.find(".grouped-checkbox-deselect-all").on("click", function(){
         base.find(".grouped-checkbox-input").prop({indeterminate: false, checked: false})
+        setInput(id)
     })
 }
 
