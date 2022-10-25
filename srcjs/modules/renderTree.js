@@ -3,6 +3,7 @@ import {ConstructTree} from "./constructTree";
 import styles from './tree.css'
 
 
+
 let generateID = (function(n) {
     return function() {
         n += 1
@@ -86,17 +87,13 @@ function hideListElement(element, animation){
 
 function setInput(id){
     let selected = []
-    let found = false
     $("#" + id).find("input:checkbox:checked").each(function(){
         selected.push($(this).val())
-        found = true
     })
-    if (found){
-        Shiny.setInputValue(id, selected);
-    } else {
-        Shiny.setInputValue(id, null);
 
-    }
+    console.log(`Setting id: ${id} too: ${selected}`)
+    Shiny.setInputValue(id, selected);
+
 }
 
 function registerEvents(id){
@@ -110,25 +107,43 @@ function registerEvents(id){
 
     // if parent group checkbox get changed, so will children
     base.find(".grouped-checkbox-input").change(function(){
+        // Select all children and change prop checked
         let element = $(this)
-        element.siblings("ul").children().find(".grouped-checkbox-input").prop("checked", element.is(":checked")).change()
+        element.siblings("ul").children().find(".grouped-checkbox-input").prop("checked", element.is(":checked"))
+
+        // If not all children have the same check value, set parent to indeterminate.
+        let checkStatus = [element.is(":checked")]
+        element.parent().parent().siblings().children().children("input[type='checkbox']").each(function(){
+            checkStatus.push($(this).is(":checked"))
+        })
+
+        
+        let uniqueValues = [... new Set(checkStatus)]
+
+        // Get parent checkbox which inderterminate needs too change.
+        let parentCheckbox = element.parent().parent().parent().siblings(".grouped-checkbox-input")
+        if (uniqueValues.length > 1){
+            // Intermediate should be set as true
+            parentCheckbox.prop({indeterminate: true, checked: false})
+        } else {
+            // Intermediate should be set to false. Value checked can be grabbed by getting the value from the element
+            parentCheckbox.prop({indeterminate: false, checked: element.is(":checked")})
+        }
     })
 
 
     // Select all button
     base.find(".grouped-checkbox-select-all").on("click", function(){
-        base.find(".grouped-checkbox-input").prop("checked", true).change()
+        base.find(".grouped-checkbox-input").prop({indeterminate: false, checked: true})
+
     })
 
     // Deselect all
     base.find(".grouped-checkbox-deselect-all").on("click", function(){
-        base.find(".grouped-checkbox-input").prop("checked", false).change()
+        base.find(".grouped-checkbox-input").prop({indeterminate: false, checked: false})
     })
 
-    // On click update input shiny
-    base.find(".grouped-checkbox-input").change(function(event) {
-        setInput(id)
-    });
+
 }
 function parseTree(choices, levels){
     return new ConstructTree(choices, levels)
@@ -217,6 +232,7 @@ function constructNode(nodeName, nodeParent, hasChildren){
 function createTree(id, label, choices, levels, collapsed, selected) {
     let base = document.getElementById(id)
 
+
     // Create label
     if (label){
         let new_label = document.createElement("h4");
@@ -265,6 +281,17 @@ function createTree(id, label, choices, levels, collapsed, selected) {
     $(document).on("shiny:connected", function() {
         registerEvents(id)
     });
+
+    $( document ).on("shiny:sessioninitialized", function() {
+        $("#" + id).find(".grouped-checkbox-input").change(function() {
+        setInput(id);
+    });
+
+        // $("#" + id).find(".grouped-checkbox-input").change(function() {
+        //     e.stopPropagation();
+        //     setInput(id);
+        // });
+    })
 
 }
 
