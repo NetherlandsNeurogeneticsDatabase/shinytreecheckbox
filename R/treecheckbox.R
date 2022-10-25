@@ -21,14 +21,13 @@
 #' @import htmlwidgets
 #' @importFrom jsonlite toJSON
 #' @export
-treecheckbox <- function(id, label, choices, levels, collapsed=F, selected=NULL, width = NULL, height = NULL) {
+treecheckbox <- function(id, label, choices, levels, collapsed = FALSE, selected = NULL, width = NULL, height = NULL) {
 
+  # Validate arguments first
   validateArgs(id, label, choices, levels, collapsed, selected, width, height)
 
-
-  
   # forward options using x
-  variables = list(
+  variables <- list(
     label = label,
     choices = jsonlite::toJSON(choices),
     levels = jsonlite::toJSON(levels),
@@ -38,11 +37,11 @@ treecheckbox <- function(id, label, choices, levels, collapsed=F, selected=NULL,
 
   # create widget
   htmlwidgets::createWidget(
-    name = 'treecheckbox',
+    name = "treecheckbox",
     variables,
     width = NULL,
     height = NULL,
-    package = 'shinytreecheckbox',
+    package = "shinytreecheckbox",
     elementId = id
   )
 }
@@ -64,19 +63,21 @@ treecheckbox <- function(id, label, choices, levels, collapsed=F, selected=NULL,
 #' @name treecheckbox-shiny
 #'
 #' @export
-treecheckboxOutput <- function(outputId, width = NULL, height = NULL){
-  htmlwidgets::shinyWidgetOutput(outputId, 'treecheckbox', width, height, package = 'shinytreecheckbox')
+treecheckboxOutput <- function(outputId, width = NULL, height = NULL) {
+  htmlwidgets::shinyWidgetOutput(outputId, "treecheckbox", width, height, package = "shinytreecheckbox")
 }
 
 #' @rdname treecheckbox-shiny
 #' @export
 renderTreecheckbox <- function(expr, env = parent.frame(), quoted = FALSE) {
-  if (!quoted) { expr <- substitute(expr) } # force quoted
+  if (!quoted) {
+    expr <- substitute(expr)
+    }
   htmlwidgets::shinyRenderWidget(expr, treecheckboxOutput, env, quoted = TRUE)
 }
 
 #' Validating arguments
-validateArgs <- function(id, label, choices, levels, collapsed=F, selected=NULL, width = NULL, height = NULL){
+validateArgs <- function(id, label, choices, levels, collapsed = FALSE, selected = NULL, width = NULL, height = NULL) {
 
   # Validate ID
   if (!is.character(id)) {
@@ -94,7 +95,7 @@ validateArgs <- function(id, label, choices, levels, collapsed=F, selected=NULL,
   }
 
   # Validate levels
-    val_levels <- sapply(levels, function(x) {
+    sapply(levels, function(x) {
     if (!is.na(match(x, colnames(choices)))) {
         return(TRUE)
     } else {
@@ -107,17 +108,11 @@ validateArgs <- function(id, label, choices, levels, collapsed=F, selected=NULL,
   if (!is.logical(collapsed)) {
     stop(sprintf("Argument:'collapsed' should be logical. You provided %s", typeof(collapsed)))
   }
-  
+
   # Validate selected
-  if(!is.null(selected)){
+  if (!is.null(selected)) {
     if (!is.vector(collapsed)) {
       stop(sprintf("Argument:'collapsed' should be logical. You provided %s", typeof(collapsed)))
+    }
   }
-  }
-
-
-
-
-  # Validate collapsed
-
 }

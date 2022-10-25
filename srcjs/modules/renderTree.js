@@ -4,12 +4,22 @@ import styles from './tree.css'
 
 
 
+
+/* A function that generates a unique ID. */
 let generateID = (function(n) {
     return function() {
         n += 1
         return n;
     }
 }(-1))
+
+
+
+/**
+ * It creates a span element, adds the class `groupedCheckboxCaret` to it, and sets its inner text to
+ * "▼".
+ * @returns A span element with the class "groupedCheckboxCaret" and the inner text "▼"
+ */
 function createCaret(){
     let caret = document.createElement("span")
     caret.classList.add(styles.groupedCheckboxCaret)
@@ -17,6 +27,12 @@ function createCaret(){
     return(caret)
 }
 
+/**
+ * It creates a checkbox input element
+ * @param nodeName - The name of the node
+ * @param nodeID - The ID of the node.
+ * @returns The inputCheckbox element
+ */
 function createInputCheckbox(nodeName, nodeID) {
     let inputCheckbox = document.createElement("input")
     inputCheckbox.classList.add("grouped-checkbox-input", "form-check-input")
@@ -26,6 +42,12 @@ function createInputCheckbox(nodeName, nodeID) {
     return(inputCheckbox)
 }
 
+/**
+ * It creates a label for a checkbox
+ * @param nodeName - the name of the node
+ * @param id - the id of the node
+ * @returns A label element
+ */
 function createCheckboxLabel(nodeName, id){
     let labelCheckbox = document.createElement("label")
     labelCheckbox.classList.add("form-check-label")
@@ -34,6 +56,11 @@ function createCheckboxLabel(nodeName, id){
     return(labelCheckbox)
 }
 
+/**
+ * It generates a container with two buttons, one to select all checkboxes and one to deselect all
+ * checkboxes
+ * @returns A div with two buttons.
+ */
 function generateSelectButtons(){
     let container = $("<div>", {"class": "flex-parent"})
     container.append($("<button>", {"class": "flex-child grouped-checkbox-select-all btn btn-outline-fg",
@@ -45,6 +72,11 @@ function generateSelectButtons(){
 
 
 
+/**
+ * It takes an element and an animation type, and toggles the visibility of the element's siblings
+ * @param element - the element that is clicked to hide/show
+ * @param animation - "toggle" or "slide"
+ */
 function hideListElement(element, animation){
     if (!animation){
         animation = "toggle"
@@ -85,15 +117,23 @@ function hideListElement(element, animation){
 
 
 
+/**
+ * It takes the id of a checkboxGroupInput, finds all the checkboxes that are checked, and then sets
+ * the Shiny input to the values of the checked checkboxes
+ * @param id - The id of the checkboxGroupInput
+ */
 function setInput(id){
     let selected = []
     $("#" + id).find("input:checkbox:checked").each(function(){
         selected.push($(this).val())
     })
+
+    // Set output
     Shiny.setInputValue(id, selected, {priority: "event"});
 
 }
 
+/* Registering events for the checkboxes. */
 function registerEvents(id){
 
     let base = $("#" + id)
@@ -141,13 +181,24 @@ function registerEvents(id){
     base.find(".grouped-checkbox-deselect-all").on("click", function(){
         base.find(".grouped-checkbox-input").prop({indeterminate: false, checked: false})
     })
-
-
 }
+
+/**
+ * > The function `parseTree` takes two arguments, `choices` and `levels`, and returns a new instance
+ * of the `ConstructTree` class
+ * @param choices - an Object with the data that will be used.
+ * @param levels - the number of levels in the tree
+ * @returns A ConstructTree object
+ */
 function parseTree(choices, levels){
     return new ConstructTree(choices, levels)
 }
 
+/**
+ * > This function takes a tree Object and appends the nodes to the DOM
+ * @param parent - the parent element to append the nodes to
+ * @param tree - the tree object
+ */
 function appendNodes(parent, tree) {
     let base = $(parent)
     base.append($("<ul>", {"class": styles.groupedCheckboxList, "id": "grouped-checkbox-list-base"}))
@@ -180,6 +231,13 @@ function appendNodes(parent, tree) {
 }
 
 
+/**
+ * It creates a new node, assigns it an ID, and appends it to the parent node
+ * @param nodeName - The name of the node
+ * @param nodeParent - The parent node of the node you're creating.
+ * @param hasChildren - boolean
+ * @returns The ID of the node that was just created.
+ */
 function constructNode(nodeName, nodeParent, hasChildren){
     // this function uses plain JS which increases the speed it takes to render the nodes by four times in comparison
     // with the more readable jquery
@@ -204,8 +262,6 @@ function constructNode(nodeName, nodeParent, hasChildren){
     node.id = newNodeID
 
 
-
-
     if (hasChildren){
         node.appendChild(createCaret())
     }
@@ -228,6 +284,16 @@ function constructNode(nodeName, nodeParent, hasChildren){
     return newNodeID
 }
 
+/**
+ * It takes a bunch of inputs, creates a tree, and then renders it
+ * @param id - The id of the element that will hold the tree
+ * @param label - The label for the tree
+ * @param choices - A list of choices. Each choice is a list of length 2, where the first element is
+ * the value of the choice, and the second element is the label.
+ * @param levels - A vector of strings that indicate the levels of the tree.
+ * @param collapsed - a boolean that determines whether the tree should be collapsed by default
+ * @param selected - A vector of values that should be selected.
+ */
 function createTree(id, label, choices, levels, collapsed, selected) {
     let base = document.getElementById(id)
 

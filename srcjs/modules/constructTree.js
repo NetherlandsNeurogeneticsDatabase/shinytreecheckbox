@@ -1,5 +1,7 @@
 
 
+/* The ConstructTree class takes in a list of records and a list of levels, and builds a tree of nodes
+where each node represents a level and each node's children represent the next level */
 class ConstructTree {
     root
     constructor(data, levels) {
@@ -7,6 +9,11 @@ class ConstructTree {
     }
 
 
+/**
+ * > The function takes in a data set and a list of levels, and builds a tree with the data set
+ * @param data - the data you want to build the tree from
+ * @param levels - an array of strings that represent the levels of the tree.
+ */
     buildTree(data, levels){
         let root = new Node("root")
         let newData
@@ -21,6 +28,10 @@ class ConstructTree {
         this.root = root
     }
 
+/**
+ * Returns the max depth of the tree
+ * @returns The depth of the tree
+ */
     findMaxDepth(){
         let queue = []
         let depth = 0
@@ -44,6 +55,13 @@ class ConstructTree {
         return depth - 1
     }
 
+/**
+ * > Given a tree and a list of values, find the node in the tree that matches the last value in the
+ * list, and if it doesn't exist, create it
+ * @param tree - the tree to search
+ * @param values - an array of values to be added to the tree
+ * @returns The tree with the new values added.
+ */
     #findOrAppend(tree, values){
         for (let i = 0; i < values.length ; i++){
             let keyQueue = values.slice(0, i + 1)
@@ -57,6 +75,13 @@ class ConstructTree {
         return(tree)
     }
 
+/**
+ * > The function takes a node and a list of values to find. It returns the node that matches the last
+ * value in the list, and the list of values that were not found
+ * @param node - the node that we are currently searching
+ * @param find - an array of strings that represent the path to the node you want to find
+ * @returns The node that is the last in the path, and the path that is left to be searched.
+ */
     #recursiveSearch(node, find){
         let children = node.children
         for (const child of children) {
@@ -70,12 +95,14 @@ class ConstructTree {
                 }
             }
         }
-
         return [node, find]
     }
 
 
 }
+
+
+/* A node is a value, a list of children, and a parent */
 class Node{
     constructor(value, children, parent) {
         if (!children){
