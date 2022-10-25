@@ -23,6 +23,10 @@
 #' @export
 treecheckbox <- function(id, label, choices, levels, collapsed=F, selected=NULL, width = NULL, height = NULL) {
 
+  validateArgs(id, label, choices, levels, collapsed, selected, width, height)
+
+
+  
   # forward options using x
   variables = list(
     label = label,
@@ -69,4 +73,51 @@ treecheckboxOutput <- function(outputId, width = NULL, height = NULL){
 renderTreecheckbox <- function(expr, env = parent.frame(), quoted = FALSE) {
   if (!quoted) { expr <- substitute(expr) } # force quoted
   htmlwidgets::shinyRenderWidget(expr, treecheckboxOutput, env, quoted = TRUE)
+}
+
+#' Validating arguments
+validateArgs <- function(id, label, choices, levels, collapsed=F, selected=NULL, width = NULL, height = NULL){
+
+  # Validate ID
+  if (!is.character(id)) {
+    stop(sprintf("Argument:'id' should be a string. You provided %s", typeof(id)))
+  }
+
+  # Validate label
+    if (!is.character(label)) {
+    stop(sprintf("Argument:'label' should be a string. You provided %s", typeof(label)))
+  }
+
+  # Validate choices
+      if (!is.data.frame(choices)) {
+    stop(sprintf("Argument:'choices' should be a data frame. You provided %s", typeof(choices)))
+  }
+
+  # Validate levels
+    val_levels <- sapply(levels, function(x) {
+    if (!is.na(match(x, colnames(choices)))) {
+        return(TRUE)
+    } else {
+        stop(sprintf("Level: '%s'\tis not a columname in choices.", x))
+        return(FALSE)
+    }
+  })
+
+  # Validate collapsed
+  if (!is.logical(collapsed)) {
+    stop(sprintf("Argument:'collapsed' should be logical. You provided %s", typeof(collapsed)))
+  }
+  
+  # Validate selected
+  if(!is.null(selected)){
+    if (!is.vector(collapsed)) {
+      stop(sprintf("Argument:'collapsed' should be logical. You provided %s", typeof(collapsed)))
+  }
+  }
+
+
+
+
+  # Validate collapsed
+
 }
