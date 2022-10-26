@@ -200,6 +200,9 @@ function registerEvents(id){
         })
     })
 
+
+    // Set input 
+    setInput(id)
 }
 
 
@@ -397,11 +400,10 @@ function createTree(id, label, choices, levels, collapsed, selected) {
             $("#" + id).find(".grouped-checkbox-input[value='" + value + "']").prop({indeterminate: false, checked: true})
         }
     }
-
-
     $(document).on("shiny:connected", function() {
         registerEvents(id)
     });
+
 }
 
 
