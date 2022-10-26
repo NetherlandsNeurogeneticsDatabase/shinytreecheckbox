@@ -62,11 +62,18 @@ function createCheckboxLabel(nodeName, id){
  * @returns A div with two buttons.
  */
 function generateSelectButtons(){
-    let container = $("<div>", {"class": "flex-parent"})
+    let container = $("<div>", {"class": "d-flex justify-content-evenly"})
     container.append($("<button>", {"class": "flex-child grouped-checkbox-select-all btn btn-outline-fg",
-        "id": "grouped-checkbox-select-all-" + generateID()}).text("Select All"))
+        "id": "grouped-checkbox-select-all-" + generateID(), "css": {"font-size": "x-small"}}).text("Select All"))
     container.append($("<button>", {"class": "flex-child grouped-checkbox-deselect-all btn btn-outline-fg",
-        "id": "grouped-checkbox-deselect-all-" + generateID()}).text("Deselect All"))
+        "id": "grouped-checkbox-deselect-all-" + generateID(), "css": {"font-size": "x-small"}}).text("Deselect All"))
+
+    container.append($("<button>", {"class": "flex-child grouped-checkbox-expand-all btn btn-outline-fg", 
+    "id": "grouped-checkbox-expand-all-" + generateID(), "css": {"font-size": "x-small"}}).text("Expand All"))
+
+    container.append($("<button>", {"class": "flex-child grouped-checkbox-collapse-all btn btn-outline-fg", 
+    "id": "grouped-checkbox-collapse-all-" + generateID(), "css": {"font-size": "x-small"}}).text("Collapse All"))
+   
     return(container)
 }
 
@@ -77,42 +84,25 @@ function generateSelectButtons(){
  * @param element - the element that is clicked to hide/show
  * @param animation - "toggle" or "slide"
  */
-function hideListElement(element, animation){
-    if (!animation){
-        animation = "toggle"
-    }
-    let caret
-    switch (animation) {
-        case "slide":
-            caret = $(element)
-            if (caret.text() === "▼" ){
-                caret.text("▶")
-                caret.siblings("." + styles.groupedCheckboxList).slideUp()
+function hideListElement(element, animation="toggle"){
+    const animations = {"toggle": {"show": "show", "hide": "hide"}, "slide": {"show": "slideDown", "hide": "slideUp"}}
 
-            } else {
-                caret.text("▼")
-                caret.siblings("." + styles.groupedCheckboxList).slideDown()
+    let caret = $(element)
+    if (!(animation in animations)){
+        throw new Error("The animation type is not supported.")
 
-            }
-            break
-
-        case "toggle":
-            caret = $(element)
-            if (caret.text() === "▼" ){
-                caret.text("▶")
-                caret.siblings("." + styles.groupedCheckboxList).hide()
-
-            } else {
-                caret.text("▼")
-                caret.siblings("." + styles.groupedCheckboxList).show()
-
-            }
-            break
-
-        default:
-            throw("Hide animations only accepts 'toggle' and 'slide'" )
     }
 
+    let collapsedStatus
+    if (caret.text() == "▼") {
+        caret.text("▶")
+        caret.siblings("." + styles.groupedCheckboxList)[animations[animation]["hide"]]()
+        collapsedStatus = "collapsed"
+    } else {
+        caret.text("▼")
+        caret.siblings("." + styles.groupedCheckboxList)[animations[animation]["show"]]()
+        collapsedStatus = "expanded"
+    }
 }
 
 
@@ -183,8 +173,59 @@ function registerEvents(id){
         base.find(".grouped-checkbox-input").prop({indeterminate: false, checked: false})
         setInput(id)
     })
+
+    // Expand all button
+    base.find(".grouped-checkbox-expand-all").on("click", function(){
+        console.log("Clicked expand all")
+        base.find("." + styles.groupedCheckboxCaret).each(function(){
+            let caret = $(this)
+            if (caret.text() == "▶") {
+                caret.text("▼")
+                caret.siblings("." + styles.groupedCheckboxList).show()
+                caret.siblings("." + styles.groupedCheckboxList).show()
+            }
+        })
+    })
+    
+
+    // Collapse all button
+    base.find(".grouped-checkbox-collapse-all").on("click", function(){
+        base.find("." + styles.groupedCheckboxCaret).each(function(){
+            let caret = $(this)
+            if (caret.text() == "▼") {
+                caret.text("▶")
+                caret.siblings("." + styles.groupedCheckboxList).hide()
+                caret.siblings("." + styles.groupedCheckboxList).hide()
+            }
+        })
+    })
+
 }
 
+
+
+function updateCollapseButtonStatus(collapseButton, event=null){
+    
+    // Set text of collapse button to "Expand All" if event is "collapsed"
+    let buttonText = collapseButton.text()
+    
+    if (event == "collapsed"){
+        if (buttonText == "Expand All"){
+            collapseButton.text("Collapse All")
+        } else {
+            collapseButton.text("Expand All")
+        }
+    } else if (event == "expanded"){
+        if (buttonText == "Expand All"){
+            collapseButton.text("Collapse All")
+        } else {
+            collapseButton.text("Expand All")
+        }
+    }
+
+
+    
+}
 /**
  * > The function `parseTree` takes two arguments, `choices` and `levels`, and returns a new instance
  * of the `ConstructTree` class
