@@ -24,15 +24,47 @@
 treecheckbox <- function(id, label, choices, levels, collapsed = FALSE, selected = NULL, width = NULL, height = NULL) {
 
   # Validate arguments first
-  validateArgs(id, label, choices, levels, collapsed, selected, width, height)
+  # validateArgs(id, label, choices, levels, collapsed, selected, width, height)
+
+
+  # Validate if id is a string
+  if (!is.character(id)) {
+    stop("id must be a string")
+  }
+
+  # Validate if label is a string
+  if (!is.character(label)) {
+    stop("label must be a string")
+  }
+
+  # Validate if choices is a dataframe. If not provide a warning and try to convert to dataframe. Else stop.
+  if (!is.data.frame(choices)) {
+    if (is.list(choices)) {
+      warning("choices is not a dataframe. Trying to convert to dataframe.")
+      choices = as.data.frame(choices)
+    } else {
+      stop("choices must be a dataframe")
+    }
+  }
+
+  # Validate if levels is a vector. Else stop.  
+  if (!is.vector(levels)) {
+    stop("levels must be a vector")
+  }
+
+  collapsed <- validate_logical_or_vector(collapsed, sprintf("Argument:'collapsed' should be logical or a vector. You provided %s", typeof(collapsed)))
+  selected <- validate_logical_or_vector(selected, sprintf("Argument:'selected' should be logical or a vector. You provided %s", typeof(selected)))
+
+
+
 
   # forward options using x
   variables <- list(
     label = label,
     choices = jsonlite::toJSON(choices),
     levels = jsonlite::toJSON(levels),
-    collapsed = jsonlite::toJSON(collapsed),
-    selected = jsonlite::toJSON(selected)
+    collapsed = collapsed,
+    selected = selected
   )
 
   # create widget
@@ -76,43 +108,15 @@ renderTreecheckbox <- function(expr, env = parent.frame(), quoted = FALSE) {
   htmlwidgets::shinyRenderWidget(expr, treecheckboxOutput, env, quoted = TRUE)
 }
 
-#' Validating arguments
-validateArgs <- function(id, label, choices, levels, collapsed = FALSE, selected = NULL, width = NULL, height = NULL) {
-
-  # Validate ID
-  if (!is.character(id)) {
-    stop(sprintf("Argument:'id' should be a string. You provided %s", typeof(id)))
+validate_logical_or_vector <- function(argument, error_message){
+  if (is.logical(argument)){
+    return(argument)
   }
-
-  # Validate label
-    if (!is.character(label)) {
-    stop(sprintf("Argument:'label' should be a string. You provided %s", typeof(label)))
+  if (is.character(argument)){
+    return(c(argument))
   }
-
-  # Validate choices
-      if (!is.data.frame(choices)) {
-    stop(sprintf("Argument:'choices' should be a data frame. You provided %s", typeof(choices)))
+  if (is.vector(argument)){
+    return(argument)
   }
-
-  # Validate levels
-    sapply(levels, function(x) {
-    if (!is.na(match(x, colnames(choices)))) {
-        return(TRUE)
-    } else {
-        stop(sprintf("Level: '%s'\tis not a columname in choices.", x))
-        return(FALSE)
-    }
-  })
-
-  # Validate collapsed
-  if (!is.logical(collapsed)) {
-    stop(sprintf("Argument:'collapsed' should be logical. You provided %s", typeof(collapsed)))
-  }
-
-  # Validate selected
-  if (!is.null(selected)) {
-    if (!is.vector(collapsed)) {
-      stop(sprintf("Argument:'collapsed' should be logical. You provided %s", typeof(collapsed)))
-    }
-  }
+  return(stop(error_message))
 }
