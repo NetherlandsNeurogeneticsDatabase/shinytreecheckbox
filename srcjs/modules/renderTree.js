@@ -359,6 +359,7 @@ function createTree(id, label, choices, levels, collapsed, selected) {
     let nodeContainer = document.createElement("div")
     nodeContainer.classList.add(styles.groupedCheckboxNodeHolder)
     nodeContainer.classList.add("overflow-auto")
+    nodeContainer.classList.add("align-self-center")
     base.appendChild(nodeContainer)
 
 
