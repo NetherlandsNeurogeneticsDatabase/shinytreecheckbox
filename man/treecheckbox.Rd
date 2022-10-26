@@ -9,7 +9,7 @@ treecheckbox(
   label,
   choices,
   levels,
-  collapsed = F,
+  collapsed = FALSE,
   selected = NULL,
   width = NULL,
   height = NULL

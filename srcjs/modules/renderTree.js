@@ -294,9 +294,10 @@ function constructNode(nodeName, nodeParent, hasChildren){
  * the value of the choice, and the second element is the label.
  * @param levels - A vector of strings that indicate the levels of the tree.
  * @param collapsed - a boolean that determines whether the tree should be collapsed by default
- * @param selected - A vector of values that should be selected.
+ * @param selected - A vector of values that should be selected, If provided true.
  */
 function createTree(id, label, choices, levels, collapsed, selected) {
+
     let base = document.getElementById(id)
 
 
@@ -313,7 +314,7 @@ function createTree(id, label, choices, levels, collapsed, selected) {
 
     let tree = parseTree(choices, levels)
 
-    // Add a container that will hold all the nodes
+    // Create a container that holds the nodes
     let nodeContainer = document.createElement("div")
     nodeContainer.classList.add(styles.groupedCheckboxNodeHolder)
     nodeContainer.classList.add("overflow-auto")
@@ -324,23 +325,34 @@ function createTree(id, label, choices, levels, collapsed, selected) {
     appendNodes(nodeContainer, tree)
 
 
-    // Check if nodes should be collapsed
-    if (collapsed){
-        $("#" + id).find("." + styles.groupedCheckboxCaret).each(function (){
+
+    // Hide the nodes
+    if (typeof(collapsed) === "boolean" && collapsed){
+        $("#" + id).find("." + style.groupedCheckboxCaret).each(function(){
             hideListElement(this, "toggle")
         })
+    } else {
+        if (typeof(collapsed) === "string"){
+            collapsed = [collapsed]
+        }
+        for (let value of collapsed){
+            let caret = $("#" + id).find("input[value='" + value + "']").siblings("." + styles.groupedCheckboxCaret);
+            hideListElement(caret, "toggle")
+        }
     }
 
     // Check which nodes should be selected
-    if (selected.length > 0){
-        for (const select of selected) {
-            let checkbox = $("#" + id).find(`input[type=checkbox][value=${select}]`)
+    if (typeof(selected) === "boolean" & selected === true){
+        $("#" + id).find(".grouped-checkbox-input").prop({indeterminate: false, checked: true})}
+    else{
 
-            // Check self
-            checkbox.attr("checked", "true")
+        // If selected is a string put it into an array
+        if (typeof(selected) === "string"){
+            selected = [selected]
+        }
 
-            // Check children
-            checkbox.siblings("ul").find(".grouped-checkbox-input").attr("checked", "true")
+        for (let value of selected){
+            $("#" + id).find(".grouped-checkbox-input[value='" + value + "']").prop({indeterminate: false, checked: true})
         }
     }
 

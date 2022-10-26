@@ -74,7 +74,7 @@ class ConstructTree {
         }
         return(tree)
     }
-
+    
 /**
  * > The function takes a node and a list of values to find. It returns the node that matches the last
  * value in the list, and the list of values that were not found
