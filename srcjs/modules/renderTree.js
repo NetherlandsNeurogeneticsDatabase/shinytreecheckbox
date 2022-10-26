@@ -328,7 +328,7 @@ function createTree(id, label, choices, levels, collapsed, selected) {
 
     // Hide the nodes
     if (typeof(collapsed) === "boolean" && collapsed){
-        $("#" + id).find("." + style.groupedCheckboxCaret).each(function(){
+        $("#" + id).find("." + styles.groupedCheckboxCaret).each(function(){
             hideListElement(this, "toggle")
         })
     } else {
