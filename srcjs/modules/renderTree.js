@@ -1,83 +1,7 @@
 import 'shiny';
 import {ConstructTree} from "./constructTree";
+import { generateID, createCaret, createInputCheckbox, createCheckboxLabel, generateSelectButtons } from './helpers';
 import styles from './tree.css'
-
-
-
-
-/* A function that generates a unique ID. */
-let generateID = (function(n) {
-    return function() {
-        n += 1
-        return n;
-    }
-}(-1))
-
-
-
-/**
- * It creates a span element, adds the class `groupedCheckboxCaret` to it, and sets its inner text to
- * "▼".
- * @returns A span element with the class "groupedCheckboxCaret" and the inner text "▼"
- */
-function createCaret(){
-    let caret = document.createElement("span")
-    caret.classList.add(styles.groupedCheckboxCaret)
-    caret.innerText = "▼"
-    return(caret)
-}
-
-/**
- * It creates a checkbox input element
- * @param nodeName - The name of the node
- * @param nodeID - The ID of the node.
- * @returns The inputCheckbox element
- */
-function createInputCheckbox(nodeName, nodeID) {
-    let inputCheckbox = document.createElement("input")
-    inputCheckbox.classList.add("grouped-checkbox-input", "form-check-input")
-    inputCheckbox.type = "checkbox"
-    inputCheckbox.value = nodeName
-    inputCheckbox.id = "node-input-check" + nodeID
-    return(inputCheckbox)
-}
-
-/**
- * It creates a label for a checkbox
- * @param nodeName - the name of the node
- * @param id - the id of the node
- * @returns A label element
- */
-function createCheckboxLabel(nodeName, id){
-    let labelCheckbox = document.createElement("label")
-    labelCheckbox.classList.add("form-check-label")
-    labelCheckbox.for = "node-input-check" + id
-    labelCheckbox.innerHTML = nodeName
-    return(labelCheckbox)
-}
-
-/**
- * It generates a container with two buttons, one to select all checkboxes and one to deselect all
- * checkboxes
- * @returns A div with two buttons.
- */
-function generateSelectButtons(){
-    let container = $("<div>", {"class": "d-flex justify-content-evenly"})
-    container.append($("<button>", {"class": "flex-child grouped-checkbox-select-all btn btn-outline-fg",
-        "id": "grouped-checkbox-select-all-" + generateID(), "css": {"font-size": "x-small"}}).text("Select All"))
-    container.append($("<button>", {"class": "flex-child grouped-checkbox-deselect-all btn btn-outline-fg",
-        "id": "grouped-checkbox-deselect-all-" + generateID(), "css": {"font-size": "x-small"}}).text("Deselect All"))
-
-    container.append($("<button>", {"class": "flex-child grouped-checkbox-expand-all btn btn-outline-fg", 
-    "id": "grouped-checkbox-expand-all-" + generateID(), "css": {"font-size": "x-small"}}).text("Expand All"))
-
-    container.append($("<button>", {"class": "flex-child grouped-checkbox-collapse-all btn btn-outline-fg", 
-    "id": "grouped-checkbox-collapse-all-" + generateID(), "css": {"font-size": "x-small"}}).text("Collapse All"))
-   
-    return(container)
-}
-
-
 
 /**
  * It takes an element and an animation type, and toggles the visibility of the element's siblings
@@ -113,11 +37,42 @@ function hideListElement(element, animation="toggle"){
  * @param id - The id of the checkboxGroupInput
  */
 function setInput(id){
-    let selected = []
-    $("#" + id).find("input:checkbox:checked").each(function(){
-        selected.push($(this).val())
-    })
+    
+    // Check if element with id 'id' has children with the button class 'styles.btnInclude'
 
+    // Checks if mode is "include" by finding the button with the class "styles.btnInclude
+    let includeMode = $("#" + id).find("." + styles.btnInclude).length > 0
+
+    let selected
+    if (includeMode){
+        selected = {"included": [], "excluded": []}
+    } else {
+        selected = []
+    }
+
+
+
+    $("#" + id).find("input:checkbox:checked").each(function(){
+        let checkbox = $(this)
+
+        // Check if the checkbox has children as we only need attribute names
+        if (checkbox.siblings("." + styles.groupedCheckboxList).length === 0){
+            if (includeMode){
+
+                 // Include mode returns two lists, one with the included attributes and one with the excluded attributes
+                let state = checkbox.siblings("." + styles.btnInclude).text()
+                if (state == "INCLUDE") {
+                    selected["included"].push(checkbox.val())
+                } else {
+                    selected["excluded"].push(checkbox.val())
+                }
+            } else {
+                // Normal mode returns a single list with the included attributes
+                selected.push(checkbox.val())
+            }
+        }
+    })
+            
     // Set output
     Shiny.setInputValue(id, selected, {priority: "event"});
 
@@ -200,8 +155,59 @@ function registerEvents(id){
         })
     })
 
+    // Include Exlude switch
+    base.find("." + styles.btnInclude).on("click", function(){
+        const allowedStates = ["INCLUDE", "EXCLUDE"]
+        let btn = $(this)
+        let currentState = btn.text()
 
-    // Set input 
+        let newState = allowedStates[(allowedStates.indexOf(currentState) + 1) % allowedStates.length]
+
+        // Set own state
+        setBtnState(btn, newState)
+
+
+        // Set state of all children
+        btn.siblings("." + styles.groupedCheckboxList).find("." + styles.btnInclude).each(function(){
+            setBtnState($(this), newState)
+        })
+
+        // Check if the status of all the children are the same. If not set the parent status to "-"
+        let checkStatus = [newState]
+        btn.parent().parent().siblings().children().children("." + styles.btnInclude).each(function(){
+            checkStatus.push($(this).text())
+        }
+        )
+        // If checkstatus is not the same, set the parent to "-"
+        let uniqueValues = [... new Set(checkStatus)]
+        if (uniqueValues.length > 1){
+            btn.parent().parent().parent().siblings("." + styles.btnInclude).each(function(){
+                setBtnState($(this), "-")
+            })
+        } else {
+            btn.parent().parent().parent().siblings("." + styles.btnInclude).each(function(){
+                setBtnState($(this), newState)
+            })
+        }
+
+        setInput(id)
+        
+
+
+    })
+
+    // If label is clicked, check the checkbox and its children checkboxes
+    base.find("." + "form-check-label").on("click", function(){
+        let label = $(this)
+        console.log("Label text: " + label.text())
+        let checkbox = label.siblings(".grouped-checkbox-input")
+        console.log("Checkbox: " + checkbox)
+        
+        // Click the checkbox so input is set
+        checkbox.click()
+    })
+
+    //Set input
     setInput(id)
 }
 
@@ -245,7 +251,7 @@ function parseTree(choices, levels){
  * @param parent - the parent element to append the nodes to
  * @param tree - the tree object
  */
-function appendNodes(parent, tree) {
+function appendNodes(parent, tree, includeMode) {
     let base = $(parent)
     base.append($("<ul>", {"class": styles.groupedCheckboxList, "id": "grouped-checkbox-list-base"}))
 
@@ -264,11 +270,11 @@ function appendNodes(parent, tree) {
             for (let child of current.children) {
                 queue.push(child)
                 if (child.parent.value === "root") {
-                    child.htmlID = constructNode(child.value, null, child.has_children)
+                    child.htmlID = constructNode(child.value, null, child.has_children, includeMode)
 
                 }
                 else {
-                    child.htmlID = constructNode(child.value, child.parent, child.has_children)
+                    child.htmlID = constructNode(child.value, child.parent, child.has_children, includeMode)
                 }
 
             }
@@ -284,9 +290,9 @@ function appendNodes(parent, tree) {
  * @param hasChildren - boolean
  * @returns The ID of the node that was just created.
  */
-function constructNode(nodeName, nodeParent, hasChildren){
+function constructNode(nodeName, nodeParent, hasChildren, include){
     // this function uses plain JS which increases the speed it takes to render the nodes by four times in comparison
-    // with the more readable jquery
+    // with the more readable jquery    
     let parent
     if (!nodeParent){
         parent = document.getElementById("grouped-checkbox-list-base")
@@ -310,12 +316,25 @@ function constructNode(nodeName, nodeParent, hasChildren){
 
     if (hasChildren){
         node.appendChild(createCaret())
-    }
+    } 
 
 
     // Add the checkbox and label component
     node.appendChild(createInputCheckbox(nodeName, nNodes))
+
+
+    // If include is true, add include/exclude button
+    if (include == true){
+        let includeButton = document.createElement("button")
+        includeButton.classList.add("btn", "btn-outline-success", "btn-sm", "mt-0", styles.btnInclude)
+        includeButton.innerHTML = "INCLUDE"
+        node.appendChild(includeButton)
+    }
+
+
+
     node.appendChild(createCheckboxLabel(nodeName, nNodes))
+        
 
     if (hasChildren){
         let newList = document.createElement("ul")
@@ -330,6 +349,33 @@ function constructNode(nodeName, nodeParent, hasChildren){
     return newNodeID
 }
 
+// Check if btn state is valid and set right classes.
+function setBtnState(btn, state){
+    const allowedStates = ["INCLUDE", "EXCLUDE", "-"]
+    if (!allowedStates.includes(state)){
+        throw new Error("The state is not supported.")
+    }
+
+    btn.text(state)
+
+
+    if (state == "INCLUDE"){
+        btn.removeClass("btn-outline-danger")
+        btn.removeClass(styles.btnIndeterminate)
+        btn.addClass("btn-outline-success")
+
+    } else if (state == "EXCLUDE"){
+        btn.removeClass("btn-outline-success")
+        btn.removeClass(styles.btnIndeterminate)
+        btn.addClass("btn-outline-danger")
+
+    }   else if (state == "-"){
+        btn.removeClass("btn-outline-success")
+        btn.removeClass("btn-outline-danger")
+        btn.addClass(styles.btnIndeterminate)
+    }
+}
+
 /**
  * It takes a bunch of inputs, creates a tree, and then renders it
  * @param id - The id of the element that will hold the tree
@@ -340,10 +386,9 @@ function constructNode(nodeName, nodeParent, hasChildren){
  * @param collapsed - a boolean that determines whether the tree should be collapsed by default
  * @param selected - A vector of values that should be selected, If provided true.
  */
-function createTree(id, label, choices, levels, collapsed, selected) {
+function createTree(id, label, choices, levels, collapsed, selected, includeMode) {
 
     let base = document.getElementById(id)
-
 
     // Create label
     if (label){
@@ -353,7 +398,7 @@ function createTree(id, label, choices, levels, collapsed, selected) {
     }
 
     // create select buttons
-    $("#" + id).append(generateSelectButtons)
+    $("#" + id).append(generateSelectButtons())
 
 
     let tree = parseTree(choices, levels)
@@ -367,7 +412,7 @@ function createTree(id, label, choices, levels, collapsed, selected) {
 
 
     // Render and append the nodes
-    appendNodes(nodeContainer, tree)
+    appendNodes(nodeContainer, tree, includeMode)
 
 
 
