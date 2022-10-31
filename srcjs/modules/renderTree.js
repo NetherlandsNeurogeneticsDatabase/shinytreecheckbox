@@ -17,7 +17,6 @@ function hideListElement(element, animation="toggle"){
 
     }
 
-    let collapsedStatus
     if (caret.text() === "▼") {
         caret.text("▶")
         caret.siblings("." + styles.groupedCheckboxList)[animations[animation]["hide"]]()
@@ -55,6 +54,7 @@ function setInput(id){
         let checkbox = $(this)
 
         // Check if the checkbox has children as we only need attribute names
+
         if (checkbox.siblings("." + styles.groupedCheckboxList).length === 0){
             if (includeMode){
 
@@ -189,9 +189,24 @@ function registerEvents(id){
         }
 
         setInput(id)
-        
+    })
 
+    // Include all
+    base.find(".grouped-checkbox-include-all").on("click", function(){
+        // find all buttons and set them to include
+        base.find("." + styles.btnInclude).each(function(){
+            setBtnState($(this), "INCLUDE")
+        })
+        setInput(id)
+    })
 
+    // Exclude all
+    base.find(".grouped-checkbox-exclude-all").on("click", function() {
+        // find all buttons and set them to include
+        base.find("." + styles.btnInclude).each(function () {
+            setBtnState($(this), "EXCLUDE")
+        })
+        setInput(id)
     })
 
     // If label is clicked, check the checkbox and its children checkboxes
@@ -211,28 +226,7 @@ function registerEvents(id){
 
 
 
-function updateCollapseButtonStatus(collapseButton, event=null){
-    
-    // Set text of collapse button to "Expand All" if event is "collapsed"
-    let buttonText = collapseButton.text()
-    
-    if (event === "collapsed"){
-        if (buttonText === "Expand All"){
-            collapseButton.text("Collapse All")
-        } else {
-            collapseButton.text("Expand All")
-        }
-    } else if (event === "expanded"){
-        if (buttonText === "Expand All"){
-            collapseButton.text("Collapse All")
-        } else {
-            collapseButton.text("Expand All")
-        }
-    }
 
-
-    
-}
 /**
  * > The function `parseTree` takes two arguments, `choices` and `levels`, and returns a new instance
  * of the `ConstructTree` class
@@ -257,6 +251,9 @@ function appendNodes(parent, tree, includeMode) {
 
     let queue = []
     queue.push(tree.root)
+
+
+
 
     while (queue.length > 0) {
         let size = queue.length
@@ -398,8 +395,7 @@ function createTree(id, label, choices, levels, collapsed, selected, includeMode
         base.appendChild(new_label)
     }
 
-    // create select buttons
-    $("#" + id).append(generateSelectButtons())
+    $("#" + id).append(generateSelectButtons(levels.length, includeMode))
 
 
     let tree = parseTree(choices, levels)

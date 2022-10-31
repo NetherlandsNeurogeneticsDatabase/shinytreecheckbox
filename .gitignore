@@ -5,3 +5,6 @@ shinytreecheckbox.Rproj
 .idea
 .vscode
 .github
+.DS_Store
+.gitignore
+srcjs/widgets/.treecheckbox.js.swp
