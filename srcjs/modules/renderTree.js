@@ -131,7 +131,6 @@ function registerEvents(id){
 
     // Expand all button
     base.find(".grouped-checkbox-expand-all").on("click", function(){
-        console.log("Clicked expand all")
         base.find("." + styles.groupedCheckboxCaret).each(function(){
             let caret = $(this)
             if (caret.text() == "▶") {
@@ -199,9 +198,7 @@ function registerEvents(id){
     // If label is clicked, check the checkbox and its children checkboxes
     base.find("." + "form-check-label").on("click", function(){
         let label = $(this)
-        console.log("Label text: " + label.text())
         let checkbox = label.siblings(".grouped-checkbox-input")
-        console.log("Checkbox: " + checkbox)
         
         // Click the checkbox so input is set
         checkbox.click()
@@ -252,7 +249,6 @@ function parseTree(choices, levels){
  * @param tree - the tree object
  */
 function appendNodes(parent, tree, includeMode) {
-    console.log("Appending to parent: ")
     let base = $(parent)
 
     base.append($("<ul>", {"class": styles.groupedCheckboxList, "id": "grouped-checkbox-list-base"}))
