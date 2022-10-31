@@ -16,6 +16,8 @@ HTMLWidgets.widget({
     return {
 
       renderValue: function(x) {
+        console.log("Rendering for: " + el.id);
+        console.log(x)
 
         createTree(el.id, x.label, x.choices, x.levels, x.collapsed, x.selected, x.includeMode)
 
