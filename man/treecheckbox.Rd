@@ -11,6 +11,7 @@ treecheckbox(
   levels,
   collapsed = FALSE,
   selected = NULL,
+  include_mode = FALSE,
   width = NULL,
   height = NULL
 )
