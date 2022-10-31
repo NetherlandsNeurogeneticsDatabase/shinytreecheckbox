@@ -252,7 +252,9 @@ function parseTree(choices, levels){
  * @param tree - the tree object
  */
 function appendNodes(parent, tree, includeMode) {
+    console.log("Appending to parent: ")
     let base = $(parent)
+
     base.append($("<ul>", {"class": styles.groupedCheckboxList, "id": "grouped-checkbox-list-base"}))
 
 
@@ -270,11 +272,13 @@ function appendNodes(parent, tree, includeMode) {
             for (let child of current.children) {
                 queue.push(child)
                 if (child.parent.value === "root") {
-                    child.htmlID = constructNode(child.value, null, child.has_children, includeMode)
+                    child.htmlID = constructNode(child.value, null, child.has_children, base, includeMode)
 
                 }
                 else {
-                    child.htmlID = constructNode(child.value, child.parent, child.has_children, includeMode)
+                    child.htmlID = /* Creating a new node with the name of the node being the first
+                    argument and the value being the second argument. */
+                    constructNode(child.value, child.parent, child.has_children, base, includeMode)
                 }
 
             }
@@ -290,15 +294,18 @@ function appendNodes(parent, tree, includeMode) {
  * @param hasChildren - boolean
  * @returns The ID of the node that was just created.
  */
-function constructNode(nodeName, nodeParent, hasChildren, include){
+function constructNode(nodeName, nodeParent, hasChildren, base, include){
     // this function uses plain JS which increases the speed it takes to render the nodes by four times in comparison
     // with the more readable jquery    
-    let parent
-    if (!nodeParent){
-        parent = document.getElementById("grouped-checkbox-list-base")
-    } else {
-        parent = document.getElementById("checkbox-list-" + nodeParent.htmlID)
 
+    // Create a variable called parent containing the dom object which is the id 'grouped-checkbox-list-base'
+
+
+    let parent;
+    if (!nodeParent){
+        parent = base.children($("." + styles.groupedCheckboxList))[0]
+    } else {
+        parent = base.find("#checkbox-list-" + nodeParent.htmlID)[0]
     }
 
     // Create ID for the nodes
@@ -389,6 +396,8 @@ function setBtnState(btn, state){
 function createTree(id, label, choices, levels, collapsed, selected, includeMode) {
 
     let base = document.getElementById(id)
+
+
 
     // Create label
     if (label){
