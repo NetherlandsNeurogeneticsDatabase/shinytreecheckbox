@@ -16,7 +16,7 @@ library(shinytreecheckbox)
 
 In the UI construct the checkboxes using `treecheckbox()`:
 
-Basic:
+### Basic:
 ```R
 treecheckbox("thisisanid", "mytreecheckbox", data.frame(order = c("Primates", "Primates", "Primates", "Primates", "Primates", "Carnivora", "Carnivora", "Birds", "Birds", "Birds", "Fish", "Fish", "Fish"), genus = c("Baboons", "Capuchin monkeys", "Chimpanzees", "Gorillas", "Mandrills", "Seals", "Candids", "Chiroxiphia", "Montezuma oropendolas", "Pale chanting goshawks", "Cichlids", "Moon wrasse", "Mozambique tilapia"))
 , c("order", "genus"), T, c("Fish", "Gorillas"))
@@ -24,12 +24,33 @@ treecheckbox("thisisanid", "mytreecheckbox", data.frame(order = c("Primates", "P
 
 ![Basic results](https://raw.githubusercontent.com/devalk96/shinytreecheckbox/media/images/example.jpeg)
 
-Include and Exclude: 
+### Include and Exclude: 
 ```R
 treecheckbox("thisisanid", "mytreecheckbox", data.frame(order = c("Primates", "Primates", "Primates", "Primates", "Primates", "Carnivora", "Carnivora", "Birds", "Birds", "Birds", "Fish", "Fish", "Fish"), genus = c("Baboons", "Capuchin monkeys", "Chimpanzees", "Gorillas", "Mandrills", "Seals", "Candids", "Chiroxiphia", "Montezuma oropendolas", "Pale chanting goshawks", "Cichlids", "Moon wrasse", "Mozambique tilapia"))
 , c("order", "genus"), T, c("Fish", "Gorillas"), include_mode=TRUE)
 ```
 ![Include and Exclude results](https://raw.githubusercontent.com/devalk96/shinytreecheckbox/media/images/example2.jpeg)
+
+### Get input
+`observeEvent()` can be used to react on change:
+
+```r 
+observeEvent(input$thisisanid, {
+  print(input$thisisanid)
+  }
+)
+```
+
+NOTE:  
+If include_mode is TRUE, the input will return a list with two names:
+```r 
+observeEvent(input$thisisanid, {
+  checkboxes_input <- input$thisisanid
+  print(checkboxes_input$include)
+  print(checkboxes_input$exclude)
+  }
+)
+```
 
 ### Example
 View an example by running:
