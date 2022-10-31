@@ -31,7 +31,7 @@ treecheckbox("thisisanid", "mytreecheckbox", data.frame(order = c("Primates", "P
 ```
 ![Include and Exclude results](https://raw.githubusercontent.com/devalk96/shinytreecheckbox/media/images/example2.jpeg)
 
-## Example
+### Example
 View an example by running:
 ```R
 example(treecheckbox, "shinytreecheckbox")
