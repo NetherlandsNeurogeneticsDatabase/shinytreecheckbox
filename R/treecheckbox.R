@@ -21,7 +21,7 @@
 #' @import htmlwidgets
 #' @importFrom jsonlite toJSON
 #' @export
-treecheckbox <- function(id, label, choices, levels, collapsed = FALSE, selected = NULL, width = NULL, height = NULL) {
+treecheckbox <- function(id, label, choices, levels, collapsed = FALSE, selected = NULL, include_mode = FALSE, width = NULL, height = NULL) {
 
   # Validate arguments first
   # validateArgs(id, label, choices, levels, collapsed, selected, width, height)
@@ -55,16 +55,14 @@ treecheckbox <- function(id, label, choices, levels, collapsed = FALSE, selected
   collapsed <- validate_logical_or_vector(collapsed, sprintf("Argument:'collapsed' should be logical or a vector. You provided %s", typeof(collapsed)))
   selected <- validate_logical_or_vector(selected, sprintf("Argument:'selected' should be logical or a vector. You provided %s", typeof(selected)))
 
-
-
-
   # forward options using x
   variables <- list(
     label = label,
     choices = jsonlite::toJSON(choices),
     levels = jsonlite::toJSON(levels),
     collapsed = collapsed,
-    selected = selected
+    selected = selected,
+    includeMode = include_mode
   )
 
   # create widget
