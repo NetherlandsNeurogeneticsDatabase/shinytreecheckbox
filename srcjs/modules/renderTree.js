@@ -1,6 +1,8 @@
 import 'shiny';
 import {ConstructTree} from "./constructTree";
 import { generateID, createCaret, createInputCheckbox, createCheckboxLabel, generateSelectButtons } from './helpers';
+
+import {generateMultiStateCheckbox, setStateOfButton} from "./multiStateCheckbox";
 import styles from './tree.css'
 
 /**
@@ -38,186 +40,222 @@ function setInput(id){
     // Check if element with id 'id' has children with the button class 'styles.btnInclude'
 
     // Checks if mode is "include" by finding the button with the class "styles.btnInclude
-    let base = $("#" + id)
-    let includeMode = base.find("." + styles.btnInclude).length > 0
 
-    let selected
-    if (includeMode){
-        selected = {"included": [], "excluded": []}
+    // Get includeMode from data
+    let includeMode = $("#" + id).data("includeMode")
+
+    let selectedValues
+
+    if (includeMode === true){
+        selectedValues = getInputIncluded(id)
+
     } else {
-        selected = []
+        selectedValues = getInputRegular(id)
     }
 
+    // let selected
+    // if (includeMode){
+    //     selected = {"included": [], "excluded": []}
+    // } else {
+    //     selected = []
+    // }
+    //
+    //
+    //
+    // $base.find("input:checkbox:checked").each(function(){
+    //     let checkbox = $(this)
+    //
+    //     // Check if the checkbox has children as we only need attribute names
+    //
+    //     if (checkbox.siblings("." + styles.groupedCheckboxList).length === 0){
+    //         if (includeMode){
+    //
+    //              // Include mode returns two lists, one with the included attributes and one with the excluded attributes
+    //             let state = checkbox.siblings("." + styles.btnInclude).text()
+    //             if (state === "INCLUDE") {
+    //                 selected["included"].push(checkbox.val())
+    //             } else {
+    //                 selected["excluded"].push(checkbox.val())
+    //             }
+    //         } else {
+    //             // Normal mode returns a single list with the included attributes
+    //             selected.push(checkbox.val())
+    //         }
+    //     }
+    // })
+            
+    // Set output
+    console.log("Setting input")
+    console.log(selectedValues)
+    Shiny.setInputValue(id, selectedValues, {priority: "event"});
 
+}
 
-    base.find("input:checkbox:checked").each(function(){
+function getInputRegular(id){
+    let $base = $("#" + id)
+    let selected = []
+
+    $base.find("input:checkbox:checked").each(function(){
         let checkbox = $(this)
 
         // Check if the checkbox has children as we only need attribute names
 
         if (checkbox.siblings("." + styles.groupedCheckboxList).length === 0){
-            if (includeMode){
-
-                 // Include mode returns two lists, one with the included attributes and one with the excluded attributes
-                let state = checkbox.siblings("." + styles.btnInclude).text()
-                if (state === "INCLUDE") {
-                    selected["included"].push(checkbox.val())
-                } else {
-                    selected["excluded"].push(checkbox.val())
-                }
-            } else {
-                // Normal mode returns a single list with the included attributes
-                selected.push(checkbox.val())
-            }
+            selected.push(checkbox.val())
         }
     })
-            
-    // Set output
-    Shiny.setInputValue(id, selected, {priority: "event"});
+
+    return selected
+
+}
+
+function getInputIncluded(id){
+    let $buttons = $("#" + id).find("." + styles.btnInclude)
+
+    let selected = {"included": [], "excluded": []}
+    for (const button of $buttons) {
+        let $button = $(button)
+        if ($button.siblings("." + styles.groupedCheckboxList).length === 0){
+            let state = $button.data("state")
+            if (state === "include"){
+                selected["included"].push($button.val())
+            }
+            else if (state === "exclude"){
+                selected["excluded"].push($button.val())
+            }
+
+        }
+    }
+
+    console.log(selected)
+    return selected
+}
+
+
+function registerIncludeModeEvents(id) {
+    let $base = $("#" + id)
+    $base.find("." + styles.btnInclude).on("click", function(){
+        setInput(id)
+    })
+}
+
+function registerRegularModeEvents(id) {
+    let $base = $("#" + id)
+    $base.find(".grouped-checkbox-input").on("click",function(){
+        // Select all children and change prop checked
+        let $element = $(this)
+        $element.siblings("ul").children().find(".grouped-checkbox-input").prop("checked", $element.is(":checked"))
+
+        // If not all children have the same check value, set parent to indeterminate.
+        let checkStatus = [$element.is(":checked")]
+        $element.parent().parent().siblings().children().children("input[type='checkbox']").each(function(){
+            checkStatus.push($(this).is(":checked"))
+        })
+
+
+        let uniqueValues = [... new Set(checkStatus)]
+
+        // Get parent checkbox which inderterminate needs too change. And set indeterminate
+        let $parentCheckbox = $element.parent().parent().parent().siblings(".grouped-checkbox-input")
+        if (uniqueValues.length > 1){
+            $parentCheckbox.prop({indeterminate: true, checked: false})
+        } else {
+            $parentCheckbox.prop({indeterminate: false, checked: $element.is(":checked")})
+        }
+        setInput(id)
+    })
 
 }
 
 /* Registering events for the checkboxes. */
 function registerEvents(id){
-
-    let base = $("#" + id)
+    let $base = $("#" + id)
 
     // Hide if caret is clicked
-    base.find("." + styles.groupedCheckboxCaret).on("click", function (){
+    $base.find("." + styles.groupedCheckboxCaret).on("click", function (){
         hideListElement(this, "toggle")
     })
 
+    let includeMode = $base.data("includeMode")
+
+    if (includeMode === true){
+        registerIncludeModeEvents(id)
+    } else {
+        registerRegularModeEvents(id)
+    }
     // if parent group checkbox get changed, so will children
-    base.find(".grouped-checkbox-input").on("click",function(){
-        // Select all children and change prop checked
-        let element = $(this)
-        element.siblings("ul").children().find(".grouped-checkbox-input").prop("checked", element.is(":checked"))
-
-        // If not all children have the same check value, set parent to indeterminate.
-        let checkStatus = [element.is(":checked")]
-        element.parent().parent().siblings().children().children("input[type='checkbox']").each(function(){
-            checkStatus.push($(this).is(":checked"))
-        })
-
-        
-        let uniqueValues = [... new Set(checkStatus)]
-
-        // Get parent checkbox which inderterminate needs too change.
-        let parentCheckbox = element.parent().parent().parent().siblings(".grouped-checkbox-input")
-        if (uniqueValues.length > 1){
-            // Intermediate should be set as true
-            parentCheckbox.prop({indeterminate: true, checked: false})
-        } else {
-            // Intermediate should be set to false. Value checked can be grabbed by getting the value from the element
-            parentCheckbox.prop({indeterminate: false, checked: element.is(":checked")})
-        }        
-        setInput(id)
-    })
 
 
     // Select all button
-    base.find(".grouped-checkbox-select-all").on("click", function(){
-        base.find(".grouped-checkbox-input").prop({indeterminate: false, checked: true})
+    $base.find(".grouped-checkbox-select-all").on("click", function(){
+        $base.find(".grouped-checkbox-input").prop({indeterminate: false, checked: true})
         setInput(id)
 
     })
 
     // Deselect all
-    base.find(".grouped-checkbox-deselect-all").on("click", function(){
-        base.find(".grouped-checkbox-input").prop({indeterminate: false, checked: false})
+    $base.find(".grouped-checkbox-deselect-all").on("click", function(){
+        if (includeMode === true){
+            // If include mode, deselect all buttons
+            $base.find("." + styles.btnInclude).each(function(){
+                setStateOfButton($(this), "unchecked")
+            })
+        } else {
+            $base.find(".grouped-checkbox-input").prop({indeterminate: false, checked: false})
+        }
         setInput(id)
     })
 
     // Expand all button
-    base.find(".grouped-checkbox-expand-all").on("click", function(){
-        base.find("." + styles.groupedCheckboxCaret).each(function(){
-            let caret = $(this)
-            if (caret.text() === "▶") {
-                caret.text("▼")
-                caret.siblings("." + styles.groupedCheckboxList).show()
-                caret.siblings("." + styles.groupedCheckboxList).show()
+    $base.find(".grouped-checkbox-expand-all").on("click", function(){
+        $base.find("." + styles.groupedCheckboxCaret).each(function(){
+            let $caret = $(this)
+            if ($caret.text() === "▶") {
+                $caret.text("▼")
+                $caret.siblings("." + styles.groupedCheckboxList).show()
+                $caret.siblings("." + styles.groupedCheckboxList).show()
             }
         })
     })
     
 
     // Collapse all button
-    base.find(".grouped-checkbox-collapse-all").on("click", function(){
-        base.find("." + styles.groupedCheckboxCaret).each(function(){
-            let caret = $(this)
-            if (caret.text() === "▼") {
-                caret.text("▶")
-                caret.siblings("." + styles.groupedCheckboxList).hide()
-                caret.siblings("." + styles.groupedCheckboxList).hide()
+    $base.find(".grouped-checkbox-collapse-all").on("click", function(){
+        $base.find("." + styles.groupedCheckboxCaret).each(function(){
+            let $caret = $(this)
+            if ($caret.text() === "▼") {
+                $caret.text("▶")
+                $caret.siblings("." + styles.groupedCheckboxList).hide()
+                $caret.siblings("." + styles.groupedCheckboxList).hide()
             }
         })
     })
 
-    // Include Exlude switch
-    base.find("." + styles.btnInclude).on("click", function(){
-        const allowedStates = ["INCLUDE", "EXCLUDE"]
-        let btn = $(this)
-        let currentState = btn.text()
-
-        let newState = allowedStates[(allowedStates.indexOf(currentState) + 1) % allowedStates.length]
-
-        // Set own state
-        setBtnState(btn, newState)
-
-
-        // Set state of all children
-        btn.siblings("." + styles.groupedCheckboxList).find("." + styles.btnInclude).each(function(){
-            setBtnState($(this), newState)
-        })
-
-        // Check if the status of all the children are the same. If not set the parent status to "-"
-        let checkStatus = [newState]
-        btn.parent().parent().siblings().children().children("." + styles.btnInclude).each(function(){
-            checkStatus.push($(this).text())
-        }
-        )
-        // If checkstatus is not the same, set the parent to "-"
-        let uniqueValues = [... new Set(checkStatus)]
-        if (uniqueValues.length > 1){
-            btn.parent().parent().parent().siblings("." + styles.btnInclude).each(function(){
-                setBtnState($(this), "-")
-            })
-        } else {
-            btn.parent().parent().parent().siblings("." + styles.btnInclude).each(function(){
-                setBtnState($(this), newState)
-            })
-        }
-
-        setInput(id)
-    })
-
     // Include all
-    base.find(".grouped-checkbox-include-all").on("click", function(){
+    $base.find(".grouped-checkbox-include-all").on("click", function(){
         // find all buttons and set them to include
-        base.find("." + styles.btnInclude).each(function(){
-            setBtnState($(this), "INCLUDE")
+        $base.find("." + styles.btnInclude).each(function(){
+            setStateOfButton($(this), "include")
         })
         setInput(id)
     })
 
     // Exclude all
-    base.find(".grouped-checkbox-exclude-all").on("click", function() {
+    $base.find(".grouped-checkbox-exclude-all").on("click", function() {
         // find all buttons and set them to include
-        base.find("." + styles.btnInclude).each(function () {
-            setBtnState($(this), "EXCLUDE")
+        $base.find("." + styles.btnInclude).each(function () {
+            setStateOfButton($(this), "exclude")
         })
         setInput(id)
     })
 
     // If label is clicked, check the checkbox and its children checkboxes
-    base.find("." + "form-check-label").on("click", function(){
-        let label = $(this)
-        console.log("Label text: " + label.text())
-        let checkbox = label.siblings(".grouped-checkbox-input")
-        console.log("Checkbox: " + checkbox)
-        
-        // Click the checkbox so input is set
-        checkbox.click()
+    $base.find("." + "form-check-label").on("click", function(){
+        if ($base.data("includeMode") === true){
+            $(this).siblings("." + styles.btnInclude).trigger("click")
+        } else {
+            $(this).siblings(".grouped-checkbox-input").trigger("click")
+        }
     })
 
     //Set input
@@ -277,7 +315,6 @@ function appendNodes(parent, tree, includeMode) {
     }
 }
 
-
 /**
  * It creates a new node, assigns it an ID, and appends it to the parent node
  * @param nodeName - The name of the node
@@ -316,20 +353,13 @@ function constructNode(nodeName, nodeParent, hasChildren, base, include){
     } 
 
 
-    // Add the checkbox and label component
-    node.appendChild(createInputCheckbox(nodeName, nNodes))
 
-
-    // If include is true, add include/exclude button
+    // Check if 'include' is true or false
     if (include === true){
-        let includeButton = document.createElement("button")
-        includeButton.classList.add("btn", "btn-outline-success", "btn-sm", "mt-0", styles.btnInclude)
-        includeButton.innerHTML = "INCLUDE"
-        node.appendChild(includeButton)
+        node.appendChild(generateMultiStateCheckbox(nodeName,"include"))
+    } else {
+        node.appendChild(createInputCheckbox(nodeName, nNodes))
     }
-
-
-
     node.appendChild(createCheckboxLabel(nodeName, nNodes))
         
 
@@ -344,33 +374,6 @@ function constructNode(nodeName, nodeParent, hasChildren, base, include){
     parent.appendChild(nodeListElement)
 
     return newNodeID
-}
-
-// Check if btn state is valid and set right classes.
-function setBtnState(btn, state){
-    const allowedStates = ["INCLUDE", "EXCLUDE", "-"]
-    if (!allowedStates.includes(state)){
-        throw new Error("The state is not supported.")
-    }
-
-    btn.text(state)
-
-
-    if (state === "INCLUDE"){
-        btn.removeClass("btn-outline-danger")
-        btn.removeClass(styles.btnIndeterminate)
-        btn.addClass("btn-outline-success")
-
-    } else if (state === "EXCLUDE"){
-        btn.removeClass("btn-outline-success")
-        btn.removeClass(styles.btnIndeterminate)
-        btn.addClass("btn-outline-danger")
-
-    }   else if (state === "-"){
-        btn.removeClass("btn-outline-success")
-        btn.removeClass("btn-outline-danger")
-        btn.addClass(styles.btnIndeterminate)
-    }
 }
 
 /**
@@ -395,7 +398,10 @@ function createTree(id, label, choices, levels, collapsed, selected, includeMode
         base.appendChild(new_label)
     }
 
-    $("#" + id).append(generateSelectButtons(levels.length, includeMode))
+    let $base = $(base)
+    $base.append(generateSelectButtons(id, levels.length > 1, includeMode))
+
+    $base.data("includeMode", includeMode)
 
 
     let tree = parseTree(choices, levels)
@@ -410,8 +416,6 @@ function createTree(id, label, choices, levels, collapsed, selected, includeMode
 
     // Render and append the nodes
     appendNodes(nodeContainer, tree, includeMode)
-
-
 
     // Hide the nodes
     if (typeof(collapsed) === "boolean" && collapsed){
