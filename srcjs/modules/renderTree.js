@@ -1,9 +1,123 @@
 import 'shiny';
 import {ConstructTree} from "./constructTree";
-import { generateID, createCaret, createInputCheckbox, createCheckboxLabel, generateSelectButtons } from './helpers';
+import {createCaret, createCheckboxLabel, createInputCheckbox, generateID, generateSelectButtons} from './helpers';
 
 import {generateMultiStateCheckbox, setStateOfButton} from "./multiStateCheckbox";
 import styles from './tree.css'
+
+function preSelectNodes(id, selected, includeMode) {
+    let $base = $("#" + id)
+
+    if (typeof(selected) === "boolean" && selected === true){
+        if (includeMode === true){
+            $base.find("." + styles.btnInclude).each(function(){
+                setStateOfButton(this, "include")
+            })
+        } else {
+            $base.find(".grouped-checkbox-input").prop({indeterminate: false, checked: true})}
+    }
+
+    else{
+
+        // If selected is a string put it into an array
+        if (typeof(selected) === "string"){
+            selected = [selected]
+        }
+
+        for (let value of selected){
+            // Add backslash to value to escape special characters
+            value = value.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g, '\\$1')
+
+            if (includeMode === true){
+                console.log("includeMode: " + includeMode + " value: " + value)
+                let button = $base.find("input[value='" + value + "']").siblings("." + styles.btnInclude)
+                setStateOfButton(button, "include")
+            } else {
+                console.log("includeMode: " + includeMode + " value: " + value)
+
+                // bind the class 'grouped-checkbox-input' to the input element
+                $base.find("input[value='" + value + "']").prop({indeterminate: false, checked: true})
+
+
+                // $base.find(".grouped-checkbox-input[value='" + value + "']").prop({indeterminate: false, checked: true})
+            }
+
+        }
+    }
+}
+
+function collapseNodes(id, collapsed) {
+    if (typeof(collapsed) === "boolean" && collapsed){
+        $("#" + id).find("." + styles.groupedCheckboxCaret).each(function(){
+            hideListElement(this, "toggle")
+        })
+    } else if (Array.isArray(collapsed) || typeof(collapsed) === "string"){
+        if (typeof(collapsed) === "string"){
+            collapsed = [collapsed]
+        }
+
+        for (let value of collapsed){
+            // Make sure to escape special characters
+            value = value.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g, '\\$1')
+            let caret = $("#" + id).find("input[value='" + value + "']").siblings("." + styles.groupedCheckboxCaret);
+            hideListElement(caret, "toggle")
+        }
+
+    }
+}
+
+/**
+ * It takes a bunch of inputs, creates a tree, and then renders it
+ * @param id - The id of the element that will hold the tree
+ * @param label - The label for the tree
+ * @param choices - A list of choices. Each choice is a list of length 2, where the first element is
+ * the value of the choice, and the second element is the label.
+ * @param levels - A vector of strings that indicate the levels of the tree.
+ * @param collapsed - a boolean that determines whether the tree should be collapsed by default
+ * @param selected - A vector of values that should be selected, If provided true.
+ * @param includeMode - A boolean that determines whether the checkboxes have an include/exclude mode
+ * @param renderSelectButtons - A boolean that determines whether the select buttons should be rendered
+ * @param renderSearchBar - A boolean that determines whether the search bar should be rendered
+ */
+function createTree(id, label, choices, levels, collapsed, selected, includeMode, renderSelectButtons, renderSearchBar){
+    let $base = $("#" + id)
+
+    if (label){
+        $base.append("<h4>" + label + "</h4>")
+    }
+    if (renderSelectButtons === true){
+        $base.append(generateSelectButtons(id, levels.length > 1, includeMode))
+    }
+
+    $base.data("includeMode", includeMode)
+
+
+    let tree = parseTree(choices, levels)
+
+    let $nodeContainer = $("<div>", {"class": styles.groupedCheckboxNodeHolder + " overflow-auto align-self-center"})
+    $base.append($nodeContainer)
+
+    // Render and append the nodes
+    appendNodes($nodeContainer.get(0), tree, includeMode)
+
+
+
+    // Hide the nodes
+    if (levels.length > 1){
+        collapseNodes(id, collapsed)
+
+    }
+
+
+    // Check which nodes should be selected
+    preSelectNodes(id, selected, includeMode)
+
+
+    $(document).on("shiny:connected", function() {
+        registerEvents(id)
+    });
+
+}
 
 /**
  * It takes an element and an animation type, and toggles the visibility of the element's siblings
@@ -36,16 +150,11 @@ function hideListElement(element, animation="toggle"){
  * @param id - The id of the checkboxGroupInput
  */
 function setInput(id){
-    
-    // Check if element with id 'id' has children with the button class 'styles.btnInclude'
-
-    // Checks if mode is "include" by finding the button with the class "styles.btnInclude
 
     // Get includeMode from data
     let includeMode = $("#" + id).data("includeMode")
 
     let selectedValues
-
     if (includeMode === true){
         selectedValues = getInputIncluded(id)
 
@@ -53,40 +162,6 @@ function setInput(id){
         selectedValues = getInputRegular(id)
     }
 
-    // let selected
-    // if (includeMode){
-    //     selected = {"included": [], "excluded": []}
-    // } else {
-    //     selected = []
-    // }
-    //
-    //
-    //
-    // $base.find("input:checkbox:checked").each(function(){
-    //     let checkbox = $(this)
-    //
-    //     // Check if the checkbox has children as we only need attribute names
-    //
-    //     if (checkbox.siblings("." + styles.groupedCheckboxList).length === 0){
-    //         if (includeMode){
-    //
-    //              // Include mode returns two lists, one with the included attributes and one with the excluded attributes
-    //             let state = checkbox.siblings("." + styles.btnInclude).text()
-    //             if (state === "INCLUDE") {
-    //                 selected["included"].push(checkbox.val())
-    //             } else {
-    //                 selected["excluded"].push(checkbox.val())
-    //             }
-    //         } else {
-    //             // Normal mode returns a single list with the included attributes
-    //             selected.push(checkbox.val())
-    //         }
-    //     }
-    // })
-            
-    // Set output
-    console.log("Setting input")
-    console.log(selectedValues)
     Shiny.setInputValue(id, selectedValues, {priority: "event"});
 
 }
@@ -99,7 +174,6 @@ function getInputRegular(id){
         let checkbox = $(this)
 
         // Check if the checkbox has children as we only need attribute names
-
         if (checkbox.siblings("." + styles.groupedCheckboxList).length === 0){
             selected.push(checkbox.val())
         }
@@ -126,8 +200,6 @@ function getInputIncluded(id){
 
         }
     }
-
-    console.log(selected)
     return selected
 }
 
@@ -289,10 +361,6 @@ function appendNodes(parent, tree, includeMode) {
 
     let queue = []
     queue.push(tree.root)
-
-
-
-
     while (queue.length > 0) {
         let size = queue.length
         let current
@@ -375,82 +443,5 @@ function constructNode(nodeName, nodeParent, hasChildren, base, include){
 
     return newNodeID
 }
-
-/**
- * It takes a bunch of inputs, creates a tree, and then renders it
- * @param id - The id of the element that will hold the tree
- * @param label - The label for the tree
- * @param choices - A list of choices. Each choice is a list of length 2, where the first element is
- * the value of the choice, and the second element is the label.
- * @param levels - A vector of strings that indicate the levels of the tree.
- * @param collapsed - a boolean that determines whether the tree should be collapsed by default
- * @param selected - A vector of values that should be selected, If provided true.
- * @param includeMode
- */
-function createTree(id, label, choices, levels, collapsed, selected, includeMode) {
-
-    let base = document.getElementById(id)
-
-    // Create label
-    if (label){
-        let new_label = document.createElement("h4");
-        new_label.innerText = label;
-        base.appendChild(new_label)
-    }
-
-    let $base = $(base)
-    $base.append(generateSelectButtons(id, levels.length > 1, includeMode))
-
-    $base.data("includeMode", includeMode)
-
-
-    let tree = parseTree(choices, levels)
-
-    // Create a container that holds the nodes
-    let nodeContainer = document.createElement("div")
-    nodeContainer.classList.add(styles.groupedCheckboxNodeHolder)
-    nodeContainer.classList.add("overflow-auto")
-    nodeContainer.classList.add("align-self-center")
-    base.appendChild(nodeContainer)
-
-
-    // Render and append the nodes
-    appendNodes(nodeContainer, tree, includeMode)
-
-    // Hide the nodes
-    if (typeof(collapsed) === "boolean" && collapsed){
-        $("#" + id).find("." + styles.groupedCheckboxCaret).each(function(){
-            hideListElement(this, "toggle")
-        })
-    } else {
-        if (typeof(collapsed) === "string"){
-            collapsed = [collapsed]
-        }
-        for (let value of collapsed){
-            let caret = $("#" + id).find("input[value='" + value + "']").siblings("." + styles.groupedCheckboxCaret);
-            hideListElement(caret, "toggle")
-        }
-    }
-
-    // Check which nodes should be selected
-    if (typeof(selected) === "boolean" && selected === true){
-        $("#" + id).find(".grouped-checkbox-input").prop({indeterminate: false, checked: true})}
-    else{
-
-        // If selected is a string put it into an array
-        if (typeof(selected) === "string"){
-            selected = [selected]
-        }
-
-        for (let value of selected){
-            $("#" + id).find(".grouped-checkbox-input[value='" + value + "']").prop({indeterminate: false, checked: true})
-        }
-    }
-    $(document).on("shiny:connected", function() {
-        registerEvents(id)
-    });
-
-}
-
 
 export {createTree}
