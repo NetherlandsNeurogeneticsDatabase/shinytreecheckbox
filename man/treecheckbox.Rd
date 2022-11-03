@@ -12,6 +12,8 @@ treecheckbox(
   collapsed = FALSE,
   selected = NULL,
   include_mode = FALSE,
+  select_buttons = TRUE,
+  search_bar = TRUE,
   width = NULL,
   height = NULL
 )
@@ -28,6 +30,12 @@ treecheckbox(
 \item{collapsed}{Logical; If \code{TRUE} checkboxes will be collapsed on render.}
 
 \item{selected}{A vector containing the values of which checkboxes will default as checked.}
+
+\item{include_mode}{Logical; If \code{TRUE} the checkboxes will be rendered with include/exclude mode.}
+
+\item{select_buttons}{Logical; If \code{TRUE} helper buttons will be rendered to select all or none, collapse or expand.}
+
+\item{search_bar}{Logical; If \code{TRUE} a search bar will be rendered}
 }
 \description{
 Creates the checkboxes.
