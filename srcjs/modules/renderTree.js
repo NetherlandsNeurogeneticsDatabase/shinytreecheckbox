@@ -60,8 +60,32 @@ function collapseNodes(id, collapsed) {
             // Make sure to escape special characters
             value = value.replace(/([ #;&,.+*~':"!^$[\]()=>|\/@])/g, '\\$1')
 
-            let $caret = $("#" + id).find("." + styles.btnInclude + "[value='" + value + "']").siblings("." + styles.groupedCheckboxCaret)
-            hideListElement($caret, "toggle")
+            // Iterate over all the caret buttons
+            $("#" + id).find("." + styles.groupedCheckboxCaret).each(function(){
+                let $input = $(this).siblings("input").first()
+                let inputVal = $input.type === "button" ? $input.data("value") : $input.val()
+                if (inputVal === value) {
+                    hideListElement(this, "toggle")
+                }
+            })
+
+            // let $node = $("#" + id).find(".GroupedCheckbox-node").each(function(){
+            //     console.log($(this).data("nodeName"))
+            //     if ($(this).data("nodeName") === value){
+            //         // Get caret and hide the node
+            //         hideListElement($(this).children("." + styles.groupedCheckboxCaret), "toggle")
+            //     }
+            // })
+            // Find
+
+            // console.log("$node")
+            // console.log($node)
+            //
+            // // Get the caret of the node
+            // let $caret = $node.find("." + styles.groupedCheckboxCaret)
+            //
+            // // let $caret = $("#" + id).find("." + styles.btnInclude + "[value='" + value + "']").siblings("." + styles.groupedCheckboxCaret)
+            // hideListElement($caret, "toggle")
         }
     }
 }
@@ -102,15 +126,18 @@ function createTree(id, label, choices, levels, collapsed, selected, includeMode
 
 
 
-    // Hide the nodes
-    if (levels.length > 1){
-        collapseNodes(id, collapsed)
 
-    }
 
 
     // Check which nodes should be selected
     preSelectNodes(id, selected, includeMode)
+
+
+
+    // Hide the nodes
+    if (levels.length > 1){
+        collapseNodes(id, collapsed)
+    }
 
 
     $(document).on("shiny:connected", function() {
@@ -415,6 +442,9 @@ function constructNode(nodeName, nodeParent, hasChildren, base, include){
     let node = document.createElement("span")
     node.classList.add("GroupedCheckBox-node", "text-fg")
     node.id = newNodeID
+
+     // Add value to node data
+    $(this).data("nodeName", nodeName)
 
 
     if (hasChildren){
