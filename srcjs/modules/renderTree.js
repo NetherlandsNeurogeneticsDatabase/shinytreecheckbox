@@ -16,9 +16,6 @@ function preSelectNodes(id, selected, includeMode) {
                 })
             } else {
                 $base.find(".grouped-checkbox-input").prop({indeterminate: false, checked: true})}
-        } else {
-            // Do nothing as the checkboxes are already unchecked
-
         }
     }
 
@@ -62,10 +59,10 @@ function collapseNodes(id, collapsed) {
         for (let value of collapsed){
             // Make sure to escape special characters
             value = value.replace(/([ #;&,.+*~':"!^$[\]()=>|\/@])/g, '\\$1')
-            let caret = $("#" + id).find("input[value='" + value + "']").siblings("." + styles.groupedCheckboxCaret);
-            hideListElement(caret, "toggle")
-        }
 
+            let $caret = $("#" + id).find("." + styles.btnInclude + "[value='" + value + "']").siblings("." + styles.groupedCheckboxCaret)
+            hideListElement($caret, "toggle")
+        }
     }
 }
 
