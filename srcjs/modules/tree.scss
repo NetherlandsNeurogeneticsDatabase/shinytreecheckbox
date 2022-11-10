@@ -20,23 +20,32 @@
 
 
 :local .btnInclude{
-  width: 16px;
-  height: 16px;
-  padding: 1px;
-  margin-left: 2px;
-  margin-right: 2px;
-  text-align: center;
-  display: inline-block;
-  line-height: 15px;
+    margin: 0;
+    border: 0;
+    background-color: transparent;
+    max-height: 18px;
+    display: inline-flex;
+    vertical-align: middle;
+    line-height: 16px;
+    padding: 0 2px 0 0;
 }
 
 :local .btnInclude:hover{
   width: fit-content;
   height: fit-content;
-
   min-width: 16px;
   min-height: 16px;
+  outline: none;
 }
+
+:local .btnHelpLabel{
+    border: 1px solid #cccccc;
+    border-left: 0;
+    display: none;
+    border-radius: 0 3px 3px 0;
+}
+
+
 
 :local .btnIndeterminate{
   border-radius: 4px;

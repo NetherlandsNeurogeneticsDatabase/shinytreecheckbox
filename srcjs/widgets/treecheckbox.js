@@ -16,10 +16,7 @@ HTMLWidgets.widget({
     return {
 
       renderValue: function(x) {
-        console.log("Rendering for: " + el.id);
-        console.log(x)
-
-        createTree(el.id, x.label, x.choices, x.levels, x.collapsed, x.selected, x.includeMode)
+        createTree(el.id, x.label, x.choices, x.levels, x.collapsed, x.selected, x.includeMode, x.select_buttons, x.search_bar)
 
         // HTMLWidgets.widget sets a default size. Remove this default size and make auto.
         $("#" + el.id).css("height", "auto").css("width", "auto")
