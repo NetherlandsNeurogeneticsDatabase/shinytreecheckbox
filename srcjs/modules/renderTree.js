@@ -20,8 +20,6 @@ function preSelectNodes(id, selected, includeMode) {
             // Do nothing as the checkboxes are already unchecked
 
         }
-
-
     }
 
     else{
@@ -37,6 +35,12 @@ function preSelectNodes(id, selected, includeMode) {
             if (includeMode === true){
                 let $btn = $base.find("." + styles.btnInclude + "[value='" + value + "']")
                 setStateOfButton($btn, "include")
+
+                // Set the children of '$btn' to the same state
+                $btn.siblings("." + styles.groupedCheckboxList).find("." + styles.btnInclude).each(function(){
+                    setStateOfButton($(this), "include")
+                })
+
             } else {
                 $base.find("input[value='" + value + "']").prop({indeterminate: false, checked: true})
             }
@@ -114,6 +118,7 @@ function createTree(id, label, choices, levels, collapsed, selected, includeMode
 
     $(document).on("shiny:connected", function() {
         registerEvents(id)
+        setInput(id)
     });
 
 }
