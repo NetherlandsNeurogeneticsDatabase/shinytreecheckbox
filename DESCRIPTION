@@ -2,8 +2,7 @@ Package: shinytreecheckbox
 Title: (Multi-State) Hierarchical Checkboxes in Shiny.
 Version: 0.1.0.9000
 Authors@R: 
-    person("Sander", "Bouwman", , "sjbouwman@outlook.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    person("Sander", "Bouwman", , "sjbouwman@outlook.com", role = c("aut", "cre"))
 Description: Create (multi-state) hierarchical checkboxes in Shiny.
 License: use_mit_license()
 Encoding: UTF-8
