@@ -8,17 +8,23 @@ import styles from './tree.css'
 function preSelectNodes(id, selected, includeMode) {
     let $base = $("#" + id)
 
-    if (typeof(selected) === "boolean" && selected === true){
-        if (includeMode === true){
-            $base.find("." + styles.btnInclude).each(function(){
-                setStateOfButton(this, "include")
-            })
+    if (typeof(selected) === "boolean"){
+        if (selected === true){
+            if (includeMode === true){
+                $base.find("." + styles.btnInclude).each(function(){
+                    setStateOfButton(this, "include")
+                })
+            } else {
+                $base.find(".grouped-checkbox-input").prop({indeterminate: false, checked: true})}
         } else {
-            $base.find(".grouped-checkbox-input").prop({indeterminate: false, checked: true})}
+            // Do nothing as the checkboxes are already unchecked
+
+        }
+
+
     }
 
     else{
-
         // If selected is a string put it into an array
         if (typeof(selected) === "string"){
             selected = [selected]
@@ -26,20 +32,13 @@ function preSelectNodes(id, selected, includeMode) {
 
         for (let value of selected){
             // Add backslash to value to escape special characters
-            value = value.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g, '\\$1')
+            value = value.replace(/([ #;&,.+*~':"!^$[\]()=>|\/@])/g, '\\$1')
 
             if (includeMode === true){
-                console.log("includeMode: " + includeMode + " value: " + value)
-                let button = $base.find("input[value='" + value + "']").siblings("." + styles.btnInclude)
-                setStateOfButton(button, "include")
+                let $btn = $base.find("." + styles.btnInclude + "[value='" + value + "']")
+                setStateOfButton($btn, "include")
             } else {
-                console.log("includeMode: " + includeMode + " value: " + value)
-
-                // bind the class 'grouped-checkbox-input' to the input element
                 $base.find("input[value='" + value + "']").prop({indeterminate: false, checked: true})
-
-
-                // $base.find(".grouped-checkbox-input[value='" + value + "']").prop({indeterminate: false, checked: true})
             }
 
         }
@@ -58,7 +57,7 @@ function collapseNodes(id, collapsed) {
 
         for (let value of collapsed){
             // Make sure to escape special characters
-            value = value.replace(/([ #;&,.+*~\':"!^$[\]()=>|\/@])/g, '\\$1')
+            value = value.replace(/([ #;&,.+*~':"!^$[\]()=>|\/@])/g, '\\$1')
             let caret = $("#" + id).find("input[value='" + value + "']").siblings("." + styles.groupedCheckboxCaret);
             hideListElement(caret, "toggle")
         }
@@ -424,7 +423,7 @@ function constructNode(nodeName, nodeParent, hasChildren, base, include){
 
     // Check if 'include' is true or false
     if (include === true){
-        node.appendChild(generateMultiStateCheckbox(nodeName,"include"))
+        node.appendChild(generateMultiStateCheckbox(nodeName,"unchecked"))
     } else {
         node.appendChild(createInputCheckbox(nodeName, nNodes))
     }

@@ -59,12 +59,12 @@ function generateMultiStateCheckbox(value, initState, states=defaultStates) {
 }
 
 
-function setParentIndeterminate(button, parentButton, states) {
-    let ownState = button.value //
-    let siblings = button.parent().parent().siblings().children("span").children("button")
+function setParentIndeterminate($button, parentButton, states) {
+    let ownState = $button.data("state")
+    let siblings = $button.parent().parent().siblings().children("span").children("button")
 
 
-    let siblingStates = siblings.map(function(){return this.value})
+    let siblingStates = siblings.map(function(){return $(this).data("state")})
 
     if(siblingStates.toArray().every(state => state === ownState)){
         setStateOfButton(parentButton, ownState, states)
@@ -82,6 +82,7 @@ function setMultiStateCheckboxLogic($button, states=defaultStates) {
         setStateOfChildren($clickedButton, newStage, states)
 
         let $parentButton = $clickedButton.parent().parent().parent().siblings("button")
+
         if ($parentButton.length > 0) {
             setParentIndeterminate($clickedButton, $parentButton, states)
         }
