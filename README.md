@@ -18,18 +18,29 @@ In the UI construct the checkboxes using `treecheckbox()`:
 
 ### Basic:
 ```R
-treecheckbox("thisisanid", "mytreecheckbox", data.frame(order = c("Primates", "Primates", "Primates", "Primates", "Primates", "Carnivora", "Carnivora", "Birds", "Birds", "Birds", "Fish", "Fish", "Fish"), genus = c("Baboons", "Capuchin monkeys", "Chimpanzees", "Gorillas", "Mandrills", "Seals", "Candids", "Chiroxiphia", "Montezuma oropendolas", "Pale chanting goshawks", "Cichlids", "Moon wrasse", "Mozambique tilapia"))
-, c("order", "genus"), T, c("Fish", "Gorillas"))
+treecheckbox(id = ns("example_treecheckbox"), 
+                          label="mytreecheckbox", 
+                          choices = data.frame(order = c("Primates", "Primates", "Primates", "Primates", "Primates", "Carnivora", "Carnivora", "Birds", "Birds", "Birds", "Fish", "Fish", "Fish"), 
+                                               genus = c("Baboons", "Capuchin monkeys", "Chimpanzees", "Gorillas", "Mandrills", "Seals", "Candids", "Chiroxiphia", "Montezuma oropendolas", "Pale chanting goshawks", "Cichlids", "Moon wrasse", "Mozambique tilapia")), 
+                          levels = c("order", "genus"), 
+                          selected=c("Carnivora", "Birds", "Seals"),
+                          collapsed=c("Primates", "Birds"))
 ```
 
-![Basic results](https://raw.githubusercontent.com/devalk96/shinytreecheckbox/media/images/example.jpeg)
+![Basic results](https://raw.githubusercontent.com/devalk96/shinytreecheckbox/media/images/treecheckbox_example1.jpg)
 
 ### Include and Exclude: 
 ```R
-treecheckbox("thisisanid", "mytreecheckbox", data.frame(order = c("Primates", "Primates", "Primates", "Primates", "Primates", "Carnivora", "Carnivora", "Birds", "Birds", "Birds", "Fish", "Fish", "Fish"), genus = c("Baboons", "Capuchin monkeys", "Chimpanzees", "Gorillas", "Mandrills", "Seals", "Candids", "Chiroxiphia", "Montezuma oropendolas", "Pale chanting goshawks", "Cichlids", "Moon wrasse", "Mozambique tilapia"))
-, c("order", "genus"), T, c("Fish", "Gorillas"), include_mode=TRUE)
+treecheckbox(id = ns("example_treecheckbox2"), 
+                          label="mytreecheckbox", 
+                          choices = data.frame(order = c("Primates", "Primates", "Primates", "Primates", "Primates", "Carnivora", "Carnivora", "Birds", "Birds", "Birds", "Fish", "Fish", "Fish"), 
+                                               genus = c("Baboons", "Capuchin monkeys", "Chimpanzees", "Gorillas", "Mandrills", "Seals", "Candids", "Chiroxiphia", "Montezuma oropendolas", "Pale chanting goshawks", "Cichlids", "Moon wrasse", "Mozambique tilapia")), 
+                          levels = c("order", "genus"), 
+                          selected="Primates",
+                          collapsed=TRUE,
+                          include_mode=TRUE)
 ```
-![Include and Exclude results](https://raw.githubusercontent.com/devalk96/shinytreecheckbox/media/images/example2.jpeg)
+![Include and Exclude results](https://raw.githubusercontent.com/devalk96/shinytreecheckbox/media/images/treecheckbox_example2.jpg)
 
 ### Get input
 `observeEvent()` can be used to react on change:
