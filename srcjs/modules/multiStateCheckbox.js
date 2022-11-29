@@ -49,7 +49,7 @@ function generateMultiStateCheckbox(value, initState, states=defaultStates) {
 
     let $includeButton = $("<button>", {"class": styles.btnInclude, "aria-label": initState, "value": value, data: {state: initState}})
         .append($("<span>", {"class": state.textColour, html: state.symbol}))
-        .append($("<span>", {"class": state.spanClasses + " " + styles.btnHelpLabel, text: state.value}).hide())
+
 
 
     // Add events to button
@@ -87,30 +87,6 @@ function setMultiStateCheckboxLogic($button, states=defaultStates) {
             setParentIndeterminate($clickedButton, $parentButton, states)
         }
     })
-
-    // On mouseover, show the text
-    $button.on("mouseover", function () {
-        // Create a timeout to prevent the text from showing when the user is just moving the mouse
-        let $clickedButton = $(this)
-        let timeout = setTimeout(function () {
-            let $typeLabel = $clickedButton.children("." + styles.btnHelpLabel)
-
-            if ($clickedButton.data("textValue") === 0) {
-                $typeLabel.hide()
-            } else {
-                $typeLabel.show()
-            }
-        }, 500)
-        $button.data("timeout", timeout)
-    })
-
-    // On mouseout, hide the text
-    $button.on("mouseout", function () {
-        clearTimeout($(this).data("timeout"))
-        let text = $(this).children("." + styles.btnHelpLabel)
-        text.hide()
-    })
-
 }
 
 function setStateOfButton($button, state, states=defaultStates) {
@@ -131,12 +107,6 @@ function setStateOfButton($button, state, states=defaultStates) {
     // Update the symbol
     $icon.empty()
     $icon.append($(states[state].symbol, {"class": states[state].textColour}))
-
-    // Update the text
-    $button.find("span").last()
-        .text(states[state].value)
-        .attr("class", states[state].spanClasses + " " +styles.btnHelpLabel)
-        .hide()
 }
 
 function setStateOfChildren($button, state, states=defaultStates){

@@ -422,6 +422,17 @@ function constructNode(nodeName, nodeParent, hasChildren, base, include){
     } 
 
 
+    // get a regex to check nodeName contains for example <e7> or <e8> and convert it to a unicode character
+    let regex = /<e\d>/g
+    let matches = nodeName.match(regex)
+    if (matches){
+        let match = matches[0]
+        let charCode = match.substring(1, match.length - 1)
+        nodeName = nodeName.replace(match, String.fromCodePoint(parseInt(charCode, 16)))
+    }
+    // nodeName = nodeName.replace(/<e7>/g, "ç")
+
+
 
     // Check if 'include' is true or false
     if (include === true){
