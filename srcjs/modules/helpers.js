@@ -1,4 +1,7 @@
 import styles from './tree.css'
+import $ from 'jquery';
+
+import {Autocomplete} from "./autocomplete";
 
 /* A function that generates a unique ID. */
 let generateID = (function(n) {
@@ -10,20 +13,21 @@ let generateID = (function(n) {
 
 
 /**
- * It creates a span element, adds the class `groupedCheckboxCaret` to it, and sets its inner text to
+ * createCaret creates a span element, adds the class `groupedCheckboxCaret` to it, and sets its inner text to
  * "▼".
  * @returns A span element with the class "groupedCheckboxCaret" and the inner text "▼"
  */
  function createCaret(){
     let caret = document.createElement("span")
-    caret.classList.add(styles.groupedCheckboxCaret)
+    // Add the class 'styles.groupedCheckboxCaret' and 'collapsed'
+    caret.classList.add(styles.groupedCheckboxCaret, "collapsed")
     caret.innerText = "▼"
     return(caret)
 }
 
 
 /**
- * It creates a checkbox input element
+ * createInputCheckbox creates a checkbox input element
  * @param nodeName - The name of the node
  * @param nodeID - The ID of the node.
  * @returns The inputCheckbox element
@@ -38,7 +42,7 @@ let generateID = (function(n) {
 }
 
 /**
- * It creates a label for a checkbox
+ * createCheckboxLabel creates a label for a checkbox
  * @param nodeName - the name of the node
  * @param id - the id of the node
  * @returns A label element
@@ -52,27 +56,43 @@ function createCheckboxLabel(nodeName, id){
 }
 
 /**
- * It generates a container with two buttons, one to select all checkboxes and one to deselect all
+ * generateSelectButtons generates a container with two buttons, one to select all checkboxes and one to deselect all
  * checkboxes
  * @returns A div with two buttons.
  */
-function generateSelectButtons(id, isHierarchical, includeMode){
+function generateSelectButtons(id, isHierarchical, includeMode, searchBar, choices){
 
     let $container = $("<div>", {"class": "d-flex justify-content-evenly"})
-
+    // let $container = $("<div>")
     let generatedID = generateID()
 
-    let $dropdown = $("<div>", {"class": "dropdown"})
 
+    constructDropdownSelect(id, $container, generatedID, includeMode)
+
+    if (isHierarchical === true){
+        constructDropdownCollapse(id, $container, generatedID)
+    }
+
+    if (searchBar === true){
+        constructSearchBar(id, $container, choices, includeMode, isHierarchical)
+    }
+
+    return($container)
+}
+
+function constructDropdownSelect(id, $container, generatedID, includeMode){
+
+    let $dropdown = $("<div>", {"class": "dropdown"})
+    let idDropdownSelect = "dropDownSelect-" + generatedID
     if (includeMode === true){
-        let $dropDownSelectButton = $("<button>", {"class": "btn btn-outline-fg dropdown-toggle ", "type": "button", "id": "dropDownSelect-" + generatedID})
+        let $dropDownSelectButton = $("<button>", {"class": "btn btn-outline-fg dropdown-toggle ", "type": "button", "id": idDropdownSelect})
             .text("(de)select all")
             .attr("data-bs-toggle", "dropdown")
             .attr("aria-expanded", "false")
         $dropdown.append($dropDownSelectButton)
 
         // Create dropdown menu for the dropdownSelect button
-        let dropDownSelectMenu = $("<ul>", {"class": "dropdown-menu", "aria-labelledby": "dropDownSelect-" + generatedID})
+        let dropDownSelectMenu = $("<ul>", {"class": "dropdown-menu", "aria-labelledby": idDropdownSelect})
         dropDownSelectMenu.append($("<li>", {"class": "dropdown-item"}).append($("<a>", {"class": "dropdown-link grouped-checkbox-include-all"}).text("Include all")))
         dropDownSelectMenu.append($("<li>", {"class": "dropdown-item"}).append($("<a>", {"class": "dropdown-link grouped-checkbox-exclude-all"}).text("Exclude all")))
         dropDownSelectMenu.append($("<li>", {"class": "dropdown-item"}).append($("<a>", {"class": "dropdown-link grouped-checkbox-deselect-all"}).text("Deselect all")))
@@ -82,7 +102,7 @@ function generateSelectButtons(id, isHierarchical, includeMode){
 
     } else {
         // We want to render the (de)select all buttons here.
-        let dropDownSelectButton = $("<button>", {"class": "btn btn-outline-fg dropdown-toggle ", "type": "button", "id": "dropDownSelect-" + generatedID})
+        let dropDownSelectButton = $("<button>", {"class": "btn btn-outline-fg dropdown-toggle ", "type": "button", "id": idDropdownSelect})
             .text("(de)select all")
             .attr("data-bs-toggle", "dropdown")
             .attr("aria-expanded", "false")
@@ -96,61 +116,86 @@ function generateSelectButtons(id, isHierarchical, includeMode){
         $dropdown.append(dropDownSelectMenu)
         $container.append($dropdown)
     }
-
-    if (isHierarchical === true){
-            // Generate collapse menu
-            $dropdown = $("<div>", {"class": "dropdown"})
-            let $dropDownCollapseButton = $("<button>", {"class": "btn btn-outline-fg dropdown-toggle ", "type": "button", "id": "dropDownCollapse-" + generatedID})
-                .text("collapse")
-                .attr("data-bs-toggle", "dropdown")
-                .attr("aria-expanded", "false")
-            $dropdown.append($dropDownCollapseButton)
-
-            // Create dropdown menu for the dropdownCollapse button
-            let $dropDownCollapseMenu = $("<ul>", {"class": "dropdown-menu", "aria-labelledby": "dropDownCollapse-" + generatedID})
-            $dropDownCollapseMenu.append($("<li>", {"class": "dropdown-item"}).append($("<a>", {"class": "dropdown-link grouped-checkbox-collapse-all"}).text("Collapse all")))
-            $dropDownCollapseMenu.append($("<li>", {"class": "dropdown-item"}).append($("<a>", {"class": "dropdown-link grouped-checkbox-expand-all"}).text("Expand all")))
-            $dropdown.append($dropDownCollapseMenu)
-            $container.append($dropdown)
-    }
-
-    //
-    // // get mode
-    //
-    // if (renderIncluded){
-    //     // Generate collapse menu
-    //     dropdown = $("<div>", {"class": "dropdown"})
-    //     let dropDownCollapseButton = $("<button>", {"class": "btn btn-outline-fg dropdown-toggle ", "type": "button", "id": "dropDownCollapse-" + generatedID})
-    //         .text("collapse")
-    //         .attr("data-bs-toggle", "dropdown")
-    //         .attr("aria-expanded", "false")
-    //     dropdown.append(dropDownCollapseButton)
-    //
-    //     // Create dropdown menu for the dropdownCollapse button
-    //     let dropDownCollapseMenu = $("<ul>", {"class": "dropdown-menu", "aria-labelledby": "dropDownCollapse-" + generatedID})
-    //     dropDownCollapseMenu.append($("<li>", {"class": "dropdown-item"}).append($("<a>", {"class": "dropdown-link grouped-checkbox-collapse-all"}).text("Collapse all")))
-    //     dropDownCollapseMenu.append($("<li>", {"class": "dropdown-item"}).append($("<a>", {"class": "dropdown-link grouped-checkbox-expand-all"}).text("Expand all")))
-    //     dropdown.append(dropDownCollapseMenu)
-    //     container.append(dropdown)
-    // }
-    //
-    // if (renderIncluded){
-    //     // Generate include menu
-    //     dropdown = $("<div>", {"class": "dropdown"})
-    //     let dropDownIncludeButton = $("<button>", {"class": "btn btn-outline-fg dropdown-toggle ", "type": "button", "id": "dropDownInclude-" + generatedID})
-    //         .text("include")
-    //         .attr("data-bs-toggle", "dropdown")
-    //         .attr("aria-expanded", "false")
-    //     dropdown.append(dropDownIncludeButton)
-    //
-    //     // Create dropdown menu for the dropdownInclude button
-    //     let dropDownIncludeMenu = $("<ul>", {"class": "dropdown-menu", "aria-labelledby": "dropDownInclude-" + generatedID})
-    //     dropDownIncludeMenu.append($("<li>", {"class": "dropdown-item"}).append($("<a>", {"class": "dropdown-link grouped-checkbox-include-all"}).text("Include all")))
-    //     dropDownIncludeMenu.append($("<li>", {"class": "dropdown-item"}).append($("<a>", {"class": "dropdown-link grouped-checkbox-exclude-all"}).text("Exclude all")))
-    //     dropdown.append(dropDownIncludeMenu)
-    //     container.append(dropdown)
-    // }
-    return($container)
 }
 
+
+function constructDropdownCollapse(id, $container, generatedID){
+    let $dropdown = $("<div>", {"class": "dropdown"})
+    let $dropDownCollapseButton = $("<button>", {"class": "btn btn-outline-fg dropdown-toggle ", "type": "button", "id": "dropDownCollapse-" + generatedID})
+        .text("collapse")
+        .attr("data-bs-toggle", "dropdown")
+        .attr("aria-expanded", "false")
+    $dropdown.append($dropDownCollapseButton)
+
+    // Create dropdown menu for the dropdownCollapse button
+    let $dropDownCollapseMenu = $("<ul>", {"class": "dropdown-menu", "aria-labelledby": "dropDownCollapse-" + generatedID})
+    $dropDownCollapseMenu.append($("<li>", {"class": "dropdown-item"}).append($("<a>", {"class": "dropdown-link grouped-checkbox-collapse-all"}).text("Collapse all")))
+    $dropDownCollapseMenu.append($("<li>", {"class": "dropdown-item"}).append($("<a>", {"class": "dropdown-link grouped-checkbox-expand-all"}).text("Expand all")))
+    $dropdown.append($dropDownCollapseMenu)
+    $container.append($dropdown)
+}
+
+
+function constructSearchBar(id, $container, choices){
+    // Create a search button that transforms into a search bar when clicked and back when the user clicks outside of the
+    // search bar.
+    let $searchButton = $("<button>", {"class": "btn btn-outline-fg", "type": "button"}).text("Search")
+    let $searchBar = $("<input>", {"class": "form-control", "type": "text", "placeholder": "Search"})
+    $container.append($searchButton)
+
+    $container.ready(function(){
+        // Flatten choices
+        let inSrc = []
+        let src = []
+        for (let i = 0; i < choices.length; i++){
+            for (let key in choices[i]){
+                let value = choices[i][key]
+                if (inSrc.includes(value) === false){
+                    inSrc.push(value)
+                    src.push({"label": value, "value": value})
+                }
+            }
+        }
+
+        // Create the search bar and logic
+        let searchBarElement = $searchBar[0]
+        new Autocomplete(searchBarElement, {
+            data: src,
+            threshold: 1,
+            onSelectItem: ({value}) => {
+                $searchBar.val("")
+
+                let node = $("#" + id).find(".GroupedCheckBox-node").filter(function(){
+                    return $(this).attr("data-node-name")=== value
+                })
+
+                node.parentsUntil("#" + id, ".GroupedCheckBox-node")
+                    .children("." + styles.groupedCheckboxCaret +".collapsed").click()
+
+                // Scroll to the node
+                node[0].scrollIntoView({behavior: "smooth", block: "center", inline: "center"})
+            }
+        })
+    })
+
+    $searchBar.hide()
+    $container.append($searchBar)
+
+
+    // When the user clicks on the search button, the search bar is shown and the search button is hidden.
+    $searchButton.on("click", function(){
+        $searchButton.hide()
+        $searchBar.show()
+        $searchBar.focus()
+        $container.find(".dropdown").hide()
+    })
+
+    // When the user clicks outside of the search bar, the search bar is hidden and the search button is shown.
+    $searchBar.on("blur", function(){
+        $searchBar.hide()
+        $searchButton.show()
+        $container.find(".dropdown").show()
+    })
+
+}
 export {createCaret, createInputCheckbox, createCheckboxLabel, generateSelectButtons, generateID}

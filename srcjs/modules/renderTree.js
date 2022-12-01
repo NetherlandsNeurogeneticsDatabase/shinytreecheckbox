@@ -68,24 +68,6 @@ function collapseNodes(id, collapsed) {
                     hideListElement(this, "toggle")
                 }
             })
-
-            // let $node = $("#" + id).find(".GroupedCheckbox-node").each(function(){
-            //     console.log($(this).data("nodeName"))
-            //     if ($(this).data("nodeName") === value){
-            //         // Get caret and hide the node
-            //         hideListElement($(this).children("." + styles.groupedCheckboxCaret), "toggle")
-            //     }
-            // })
-            // Find
-
-            // console.log("$node")
-            // console.log($node)
-            //
-            // // Get the caret of the node
-            // let $caret = $node.find("." + styles.groupedCheckboxCaret)
-            //
-            // // let $caret = $("#" + id).find("." + styles.btnInclude + "[value='" + value + "']").siblings("." + styles.groupedCheckboxCaret)
-            // hideListElement($caret, "toggle")
         }
     }
 }
@@ -110,7 +92,7 @@ function createTree(id, label, choices, levels, collapsed, selected, includeMode
         $base.append("<h4>" + label + "</h4>")
     }
     if (renderSelectButtons === true){
-        $base.append(generateSelectButtons(id, levels.length > 1, includeMode))
+        $base.append(generateSelectButtons(id, levels.length > 1, includeMode, renderSearchBar, choices))
     }
 
     $base.data("includeMode", includeMode)
@@ -162,9 +144,11 @@ function hideListElement(element, animation="toggle"){
     }
 
     if (caret.text() === "▼") {
+        caret.removeClass("expanded").addClass("collapsed")
         caret.text("▶")
         caret.siblings("." + styles.groupedCheckboxList)[animations[animation]["hide"]]()
     } else {
+        caret.removeClass("collapsed").addClass("expanded")
         caret.text("▼")
         caret.siblings("." + styles.groupedCheckboxList)[animations[animation]["show"]]()
     }
@@ -337,6 +321,7 @@ function registerEvents(id){
         $base.find("." + styles.btnInclude).each(function(){
             setStateOfButton($(this), "include")
         })
+        console.log("include all")
         setInput(id)
     })
 
@@ -346,6 +331,8 @@ function registerEvents(id){
         $base.find("." + styles.btnInclude).each(function () {
             setStateOfButton($(this), "exclude")
         })
+        console.log("exclude all")
+
         setInput(id)
     })
 
@@ -437,15 +424,13 @@ function constructNode(nodeName, nodeParent, hasChildren, base, include){
 
     let nodeListElement = document.createElement("li")
 
-
     // Create node and assign classes
     let node = document.createElement("span")
     node.classList.add("GroupedCheckBox-node", "text-fg")
     node.id = newNodeID
 
-     // Add value to node data
-    $(this).data("nodeName", nodeName)
-
+    // Store the node name in the node
+    node.setAttribute("data-node-name", nodeName)
 
     if (hasChildren){
         node.appendChild(createCaret())
@@ -482,7 +467,6 @@ function constructNode(nodeName, nodeParent, hasChildren, base, include){
 
     nodeListElement.appendChild(node)
     parent.appendChild(nodeListElement)
-
     return newNodeID
 }
 
