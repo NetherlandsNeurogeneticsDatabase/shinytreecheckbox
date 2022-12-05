@@ -159,13 +159,6 @@ function constructDropdownCollapse(id, $container, generatedID) {
 }
 
 function constructSearchBar(id, $container, choices) {
-    // Create a search button that transforms into a search bar when clicked and back when the user clicks outside of the
-    // search bar.
-    let $searchButton = $("<button>", {"class": "btn btn-outline-fg", "type": "button"}).text("Search")
-    let $searchBar = $("<input>", {"class": "form-control searchBar", "type": "text", "autocomplete": "off", "placeholder": "Search"})
-    $container.append($searchButton)
-    $container.append($searchBar)
-
     function hideSearchButton() {
         $searchButton.hide()
         $searchBar.show()
@@ -182,6 +175,16 @@ function constructSearchBar(id, $container, choices) {
             $searchBar.parent().hide()
         }, 200)
     }
+
+    let $searchButton = $("<button>", {"class": "btn btn-outline-fg", "type": "button"}).text("Search")
+        .prepend($("<i>", {"class": "fa-solid fa-magnifying-glass"}))
+        .prepend(" ")
+
+    let $searchBar = $("<input>", {"class": "form-control searchBar", "type": "text", "autocomplete": "off", "placeholder": "Search"})
+
+    $container.append($searchButton)
+    $container.append($searchBar)
+
     $container.ready(function () {
         // Flatten choices
         let inSrc = []
