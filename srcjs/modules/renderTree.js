@@ -4,6 +4,7 @@ import {createCaret, createCheckboxLabel, createInputCheckbox, generateID, gener
 
 import {generateMultiStateCheckbox, setStateOfButton} from "./multiStateCheckbox";
 import styles from './tree.css'
+import xss from "xss";
 
 function preSelectNodes(id, selected, includeMode) {
     let $base = $("#" + id)
@@ -28,6 +29,7 @@ function preSelectNodes(id, selected, includeMode) {
         for (let value of selected){
             // Add backslash to value to escape special characters
             value = value.replace(/([ #;&,.+*~':"!^$[\]()=>|\/@])/g, '\\$1')
+            value = xss(value)
 
             if (includeMode === true){
                 let $btn = $base.find("." + styles.btnInclude + "[value='" + value + "']")
@@ -59,11 +61,10 @@ function collapseNodes(id, collapsed) {
         for (let value of collapsed){
             // Make sure to escape special characters
             value = value.replace(/([ #;&,.+*~':"!^$[\]()=>|\/@])/g, '\\$1')
-
-            // Iterate over all the caret buttons
+            value = xss(value)
             $("#" + id).find("." + styles.groupedCheckboxCaret).each(function(){
                 let $input = $(this).siblings("input").first()
-                let inputVal = $input.type === "button" ? $input.data("value") : $input.val()
+                let inputVal = $input.type === "button" ? $input.data("value") : xss($input.val())
                 if (inputVal === value) {
                     hideListElement(this, "toggle")
                 }

@@ -5,6 +5,9 @@
  * @Author: SJ. Bouwman
  * @Date: 2022-12-02
  */
+
+import xss from "xss";
+
 class SearchBar {
     options = {
         threshold: 2,
@@ -29,6 +32,7 @@ class SearchBar {
 
     addChoice($dropdown, label, value) {
         let $button = $("<button>", {"class": "dropdown-item", "type": "button"}).text(label)
+        $button.attr("data-value", value)
         $button.on("click", () => {
             this.options.onSelectItem($button.text(), value)
         })
@@ -66,7 +70,9 @@ class SearchBar {
 
         // If the searchbar receives text do a search
         $searchBar.on("input", () => {
-            let text = $searchBar.val();
+            let text = xss($searchBar.val());
+            // Sanitize the text to prevent XSS
+
             if (text.length > 0) {
                 if (this.options.threshold <= text.length) {
                     this.search(text);
@@ -143,8 +149,8 @@ class SearchBar {
      * @param button
      */
     colorText(text, button) {
-        // Get the text of the button
-        let label = button.text()
+        // Get the value of the button
+        let label = xss(button.data("value"))
 
         // Match all the text that matches the search text
         let regex = new RegExp(text, "gi")
