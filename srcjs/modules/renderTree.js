@@ -297,7 +297,7 @@ function registerEvents(id){
             if ($caret.text() === "▶") {
                 $caret.text("▼")
                 $caret.siblings("." + styles.groupedCheckboxList).show()
-                $caret.siblings("." + styles.groupedCheckboxList).show()
+                $caret.addClass("expanded").removeClass("collapsed")
             }
         })
     })
@@ -309,7 +309,7 @@ function registerEvents(id){
             let $caret = $(this)
             if ($caret.text() === "▼") {
                 $caret.text("▶")
-                $caret.siblings("." + styles.groupedCheckboxList).hide()
+                $caret.addClass("collapsed").removeClass("expanded")
                 $caret.siblings("." + styles.groupedCheckboxList).hide()
             }
         })
@@ -321,7 +321,6 @@ function registerEvents(id){
         $base.find("." + styles.btnInclude).each(function(){
             setStateOfButton($(this), "include")
         })
-        console.log("include all")
         setInput(id)
     })
 
@@ -331,8 +330,6 @@ function registerEvents(id){
         $base.find("." + styles.btnInclude).each(function () {
             setStateOfButton($(this), "exclude")
         })
-        console.log("exclude all")
-
         setInput(id)
     })
 

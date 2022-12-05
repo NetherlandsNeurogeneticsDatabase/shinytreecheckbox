@@ -162,10 +162,26 @@ function constructSearchBar(id, $container, choices) {
     // Create a search button that transforms into a search bar when clicked and back when the user clicks outside of the
     // search bar.
     let $searchButton = $("<button>", {"class": "btn btn-outline-fg", "type": "button"}).text("Search")
-    let $searchBar = $("<input>", {"class": "form-control searchBar", "type": "text", "placeholder": "Search"})
+    let $searchBar = $("<input>", {"class": "form-control searchBar", "type": "text", "autocomplete": "off", "placeholder": "Search"})
     $container.append($searchButton)
     $container.append($searchBar)
 
+    function hideSearchButton() {
+        $searchButton.hide()
+        $searchBar.show()
+        $container.find(".dropdown-select").hide()
+        $searchBar.parent().show()
+        $searchBar.focus()
+    }
+
+    function showSearchButton() {
+        setTimeout(function () {
+            $searchBar.hide()
+            $searchButton.show()
+            $container.find(".dropdown-select").show()
+            $searchBar.parent().hide()
+        }, 200)
+    }
     $container.ready(function () {
         // Flatten choices
         let inSrc = []
@@ -182,14 +198,23 @@ function constructSearchBar(id, $container, choices) {
 
         // Create the search bar and logic
         let searchBarElement = $searchBar[0]
+        let lastClickedNode = null
         new SearchBar(searchBarElement, {
             data: src,
             maxItems: 10,
             onSelectItem: (label, value) => {
-
                 let node = $("#" + id).find(".GroupedCheckBox-node").filter(function () {
                     return $(this).attr("data-node-name") === value
                 })
+
+                // Get all the label elements and set the text to bold. Make sure to reset the text of the last clicked
+                // node to normal.
+                node.find("label").css("font-weight", "bold").addClass("text-primary").removeClass("text-fg")
+
+                if (lastClickedNode !== null) {
+                    lastClickedNode.find("label").css("font-weight", "normal").addClass("text-fg").removeClass("text-primary")
+                }
+                lastClickedNode = node
 
                 node.parentsUntil("#" + id, ".GroupedCheckBox-node")
                     .children("." + styles.groupedCheckboxCaret + ".collapsed").click()
@@ -201,27 +226,22 @@ function constructSearchBar(id, $container, choices) {
 
         // Hide the search bar
         $searchBar.hide()
-
-        // Hide the div that contains the search bar
         $searchBar.parent().hide()
 
         // When the user clicks on the search button, the search bar is shown and the search button is hidden.
         $searchButton.on("click", function () {
-            $searchButton.hide()
-            $searchBar.show()
-            $container.find(".dropdown-select").hide()
-            $searchBar.parent().show()
-            $searchBar.focus()
+            hideSearchButton();
         })
 
-        // When the user clicks outside of the search bar, the search bar is hidden and the search button is shown.
+        // Prevent enter from clicking the first button
+        $searchBar.on("keydown", function (e) {
+            if (e.keyCode === 13) {
+                e.preventDefault()
+            }
+        })
+        // When the user clicks outside the search bar, the search bar is hidden and the search button is shown.
         $searchBar.on("blur", function () {
-            setTimeout(function () {
-                $searchBar.hide()
-                $searchButton.show()
-                $container.find(".dropdown-select").show()
-                $searchBar.parent().hide()
-            }, 200)
+            showSearchButton()
         })
     })
 
