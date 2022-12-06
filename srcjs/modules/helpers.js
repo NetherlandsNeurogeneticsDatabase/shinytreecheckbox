@@ -210,12 +210,9 @@ function constructSearchBar(id, $container, choices) {
                     return $(this).attr("data-node-name") === value
                 })
 
-                // Get all the label elements and set the text to bold. Make sure to reset the text of the last clicked
-                // node to normal.
-                node.find("label").css("font-weight", "bold").addClass("text-primary").removeClass("text-fg")
-
+                node.find("label").first().css("font-weight", "bold").addClass("text-primary").removeClass("text-fg")
                 if (lastClickedNode !== null) {
-                    lastClickedNode.find("label").css("font-weight", "normal").addClass("text-fg").removeClass("text-primary")
+                    lastClickedNode.find("label").first().css("font-weight", "normal").addClass("text-fg").removeClass("text-primary")
                 }
                 lastClickedNode = node
 

@@ -220,8 +220,27 @@ function getInputIncluded(id){
 function registerIncludeModeEvents(id) {
     let $base = $("#" + id)
     $base.find("." + styles.btnInclude).on("click", function(){
+        updateLabelColour($(this).siblings("label").first())
         setInput(id)
     })
+}
+
+/**
+ * Because the search buttons highlights the labels, we need to update the colour of the labels
+ * when the state of the button/checkbox changes back to normal
+ * This function checks if the label has the class "text-primary" and if so, it removes it. Also font-weight is set back
+ * to normal.
+ * @returns {boolean} - True if the label was highlighted, false otherwise
+ * @param $labelElement The label element to check if it is highlighted
+ */
+function updateLabelColour($labelElement){
+    if ($labelElement.hasClass("text-primary")){
+        $labelElement.removeClass("text-primary").addClass("text-fg")
+        $labelElement.css("font-weight", "normal")
+        return true
+    } else {
+        return false
+    }
 }
 
 function registerRegularModeEvents(id) {
@@ -237,6 +256,8 @@ function registerRegularModeEvents(id) {
             checkStatus.push($(this).is(":checked"))
         })
 
+        // If the label from the checkbox has a class "text-primary" then remove this and add "text-fg"
+        updateLabelColour($(this).parent().find("label").first())
 
         let uniqueValues = [... new Set(checkStatus)]
 
