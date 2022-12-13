@@ -5,7 +5,7 @@ where each node represents a level and each node's children represent the next l
 class ConstructTree {
     root
     constructor(data, levels) {
-        this.buildTree(data, levels)
+        this.buildTreeHash(data, levels)
     }
 
 
@@ -14,21 +14,42 @@ class ConstructTree {
  * @param data - the data you want to build the tree from
  * @param levels - an array of strings that represent the levels of the tree.
  */
-    buildTree(data, levels){
+    // buildTree(data, levels){
+    //     let root = new Node("root")
+    //     let newData
+    //
+    //     data.forEach(record => {
+    //         newData = []
+    //         levels.forEach(level => {
+    //             newData.push(record[level])
+    //         })
+    //         this.#findOrAppend(root, newData)
+    //     })
+    //     this.root = root
+    // }
+
+    buildTreeHash(data, levels) {
         let root = new Node("root")
-        let newData
+        let nodes = { "root": root }
 
         data.forEach(record => {
-            newData = []
+            let currentNode = root
             levels.forEach(level => {
-                newData.push(record[level])
+                let value = record[level]
+                if (!(value in nodes)) {
+                    let newNode = new Node(value)
+                    currentNode.add_child(newNode)
+                    nodes[value] = newNode
+                }
+                currentNode = nodes[value]
             })
-            this.#findOrAppend(root, newData)
         })
         this.root = root
     }
 
-/**
+
+
+    /**
  * Returns the max depth of the tree
  * @returns The depth of the tree
  */
