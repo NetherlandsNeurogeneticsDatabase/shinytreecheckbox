@@ -13,11 +13,13 @@ class SearchBar {
         threshold: 2,
         data: [],
         onSelectItem: null,
-        maxItems: 5
+        maxItems: 5,
+        searchAlgorithm: "trie"
     }
 
     constructor(element, options = {}) {
         this.processOptions(options);
+        this.searchTrie = new Trie()
         this.searchBar = this.AttachSearchBar(element);
         this.dropdown = this.createDropdown();
     }
@@ -36,7 +38,11 @@ class SearchBar {
         $button.on("click", () => {
             this.options.onSelectItem($button.text(), value)
         })
-        $dropdown.append($("<li>").append($button).hide());
+        let $li = $("<li>")
+        $dropdown.append($li.append($button).hide());
+
+        // Add to trie
+        this.searchTrie.insert(label, $li[0])
         return $button
     }
 
@@ -46,12 +52,19 @@ class SearchBar {
             throw new Error('Options must be an object');
         }
 
+
         // Replace default options with user options, but only if the user options is defined in the default options
         for (let key in options) {
             if (this.options.hasOwnProperty(key)) {
                 this.options[key] = options[key];
             }
         }
+
+        let allowed = ["trie", "filter"]
+        if (!allowed.includes(this.options.searchAlgorithm)) {
+            throw new Error(`Search algorithm must be one of ${allowed.join(", ")}. Provided: ${this.options.searchAlgorithm}`)
+        }
+
     }
 
     AttachSearchBar(element) {
@@ -75,9 +88,8 @@ class SearchBar {
 
             if (text.length > 0) {
                 if (this.options.threshold <= text.length) {
-                    console.time("SearchTimer")
-                    this.search(text);
-                    console.timeEnd("SearchTimer")
+                    let searchResults = this.search(text)
+                    this.process($(searchResults), text)
                 } else {
                     this.hideDropdown()
                 }
@@ -91,6 +103,7 @@ class SearchBar {
         })
         return $searchBar[0]
     }
+
 
     createDropdown() {
         let $dropdownContainer = $("<div>", {"class": "dropdown w-100"})
@@ -111,21 +124,32 @@ class SearchBar {
         this.options.data.map((choice) => {
             this.addChoice($dropdownMenu, choice.label, choice.value)
         })
+
+
         return $dropdownMenu[0]
     }
 
+    search(text){
+        //TODO implement smarter algorithm selection
+        if (this.options.searchAlgorithm === "trie") {
+            return this.trieSearch(text)
+        } else if (this.options.searchAlgorithm === "filter") {
+            return this.filterSearch(text)
+        }
+        else {
+            throw new Error("Invalid search algorithm")
+        }
 
-    search(text) {
+    }
+
+    trieSearch(text){
+        return this.searchTrie.search(text).flat()
+    }
+
+    process($filteredItems, text){
         let $dropdown = $(this.dropdown)
         let dropdownVisible = false
         let shownItems = 0
-
-        // Get all the buttons that have the searched text.
-        let $filteredItems = $(this.dropdown).find("li").filter((index, item) => {
-            let $button = $(item).find("button")
-            let label = $button.text().toLowerCase()
-            return label.indexOf(text.toLowerCase()) !== -1
-        })
 
         // Iterate over the filtered collection using the .each() method
         $filteredItems.each((index, item) => {
@@ -146,6 +170,18 @@ class SearchBar {
         } else {
             this.hideDropdown()
         }
+    }
+
+    filterSearch(text) {
+        // Filter that checks if the text is in the label. Generally (much) slower than the trie search but
+        // allows to search throughout the whole label and not just the start of the label.
+        return [...this.dropdown.querySelectorAll("li")].filter((item, index) => {
+            let button = item.querySelector("button");
+            let label = button.textContent.toLowerCase();
+            return label.indexOf(text.toLowerCase()) !== -1;
+        })
+
+
     }
 
     /**
@@ -177,6 +213,59 @@ class SearchBar {
         }
         newLabel += label.substring(lastIndex)
         button.html(newLabel)
+    }
+}
+
+class TrieNode {
+
+    constructor(character) {
+        this.data = character;
+        this.isEnd = false;
+        this.children = new Map();
+    }
+}
+
+class Trie {
+    constructor() {
+        this.root = new TrieNode(null);
+        this.resultMap = {}
+    }
+
+    insert (word, result) {
+        word = word.toLowerCase();
+        if (word in this.resultMap){
+            this.resultMap[word].push(result)
+        } else {
+            this.resultMap[word] = [result]
+        }
+        let node = this.root;
+        for (let character of word) {
+            if (!node.children.has(character))
+                node.children.set(character, new TrieNode(character));
+            node = node.children.get(character);
+        }
+        node.isEnd = true;
+    }
+
+    search (word) {
+        word = word.toLowerCase()
+        let res = [];
+        let node = this.root;
+        for (let ch of word) {
+            if (node.children.has(ch))
+                node = node.children.get(ch);
+            else
+                return res;
+        }
+        this.autocomplete(node, res, word.substring(0, word.length-1));
+        return res.map(re => this.resultMap[re]);
+    }
+
+    autocomplete (node, res, prefix)  {
+        if (node.isEnd)
+            res.push(prefix + node.data);
+        for (let c of node.children.keys())
+            this.autocomplete(node.children.get(c), res, prefix + node.data);
     }
 }
 
