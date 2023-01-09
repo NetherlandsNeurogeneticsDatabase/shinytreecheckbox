@@ -75,7 +75,9 @@ class SearchBar {
 
             if (text.length > 0) {
                 if (this.options.threshold <= text.length) {
+                    console.time("SearchTimer")
                     this.search(text);
+                    console.timeEnd("SearchTimer")
                 } else {
                     this.hideDropdown()
                 }
@@ -114,25 +116,29 @@ class SearchBar {
 
 
     search(text) {
-        let $dropdownItems = $(this.dropdown).find("li");
         let $dropdown = $(this.dropdown)
         let dropdownVisible = false
         let shownItems = 0
-        $dropdownItems.each((index, item) => {
-            let $item = $(item)
-            let $button = $item.find("button")
+
+        // Get all the buttons that have the searched text.
+        let $filteredItems = $(this.dropdown).find("li").filter((index, item) => {
+            let $button = $(item).find("button")
             let label = $button.text().toLowerCase()
-            if (label.includes(text.toLowerCase())) {
-                shownItems++
-                if (shownItems <= this.options.maxItems) {
-                    $item.show()
-                    this.colorText(text, $button)
-                    dropdownVisible = true
-                }
+            return label.indexOf(text.toLowerCase()) !== -1
+        })
+
+        // Iterate over the filtered collection using the .each() method
+        $filteredItems.each((index, item) => {
+            shownItems++
+            if (shownItems <= this.options.maxItems) {
+                $(item).show()
+                this.colorText(text, $(item).find("button"))
+                dropdownVisible = true
             } else {
-                $item.hide()
+                $(item).hide()
             }
         })
+
         if (dropdownVisible) {
             if (!$dropdown.is(":visible")) {
                 this.showDropdown()
@@ -140,7 +146,6 @@ class SearchBar {
         } else {
             this.hideDropdown()
         }
-
     }
 
     /**

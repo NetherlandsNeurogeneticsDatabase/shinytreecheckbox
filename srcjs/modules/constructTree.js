@@ -14,20 +14,6 @@ class ConstructTree {
  * @param data - the data you want to build the tree from
  * @param levels - an array of strings that represent the levels of the tree.
  */
-    // buildTree(data, levels){
-    //     let root = new Node("root")
-    //     let newData
-    //
-    //     data.forEach(record => {
-    //         newData = []
-    //         levels.forEach(level => {
-    //             newData.push(record[level])
-    //         })
-    //         this.#findOrAppend(root, newData)
-    //     })
-    //     this.root = root
-    // }
-
     buildTreeHash(data, levels) {
         let root = new Node("root")
         let nodes = { "root": root }
