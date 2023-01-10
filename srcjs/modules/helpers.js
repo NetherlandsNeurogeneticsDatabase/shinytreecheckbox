@@ -204,10 +204,9 @@ function constructSearchBar(id, $container, choices) {
         let lastClickedNode = null
         new SearchBar(searchBarElement, {
             data: src,
-            maxItems: 10,
             onSelectItem: (label, value) => {
                 let node = $("#" + id).find(".GroupedCheckBox-node").filter(function () {
-                    return $(this).attr("data-node-name") === value
+                    return $(this).text() === label
                 })
 
                 node.find("label").first().css("font-weight", "bold").addClass("text-primary").removeClass("text-fg")

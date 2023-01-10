@@ -10,11 +10,10 @@ import xss from "xss";
 
 class SearchBar {
     options = {
-        threshold: 2,
+        searchThreshold: 1,
         data: [],
         onSelectItem: null,
-        maxItems: 5,
-        searchAlgorithm: "trie"
+        maxItems: 100,
     }
 
     constructor(element, options = {}) {
@@ -22,6 +21,45 @@ class SearchBar {
         this.searchTrie = new Trie()
         this.searchBar = this.AttachSearchBar(element);
         this.dropdown = this.createDropdown();
+        this.attachLogic()
+    }
+
+    attachLogic(){
+        let $searchBar = $(this.searchBar)
+        let $dropdown = $(this.dropdown)
+
+        // If the searchbar receives text do a search
+        $searchBar.on("input", () => {
+            // Sanitize the text to prevent XSS
+            let text = xss($searchBar.val());
+
+            // Remove all previous items
+            $dropdown.empty("li")
+
+
+            // We only want to process the text if the threshold is reached
+            let nSearchResults = 0
+            if (text.length >= this.options.searchThreshold) {
+                let searchResults = this.search(text)
+                this.process(searchResults, text)
+                nSearchResults = searchResults.length
+            }
+
+            // If there are search results we want to show the dropdown
+            if (nSearchResults > 0) {
+                this.showDropdown()
+            } else {
+                this.hideDropdown()
+            }
+        })
+
+
+
+        $searchBar.on("click", () => {
+            if ($(this.dropdown).is(":visible") && $(this.dropdown).find("li:visible").length === 0) {
+                this.hideDropdown()
+            }
+        })
     }
 
     hideDropdown() {
@@ -32,18 +70,33 @@ class SearchBar {
         $(this.dropdown).show()
     }
 
-    addChoice($dropdown, label, value) {
+    createButton(label, value) {
         let $button = $("<button>", {"class": "dropdown-item", "type": "button"}).text(label)
         $button.attr("data-value", value)
         $button.on("click", () => {
             this.options.onSelectItem($button.text(), value)
         })
-        let $li = $("<li>")
-        $dropdown.append($li.append($button).hide());
 
-        // Add to trie
-        this.searchTrie.insert(label, $li[0])
         return $button
+    }
+
+    attachItem($dropdown, label, value){
+        let $button = this.createButton(label, value)
+        let $li = $("<li>")
+        $li.append($button)
+        $dropdown.append($li)
+        return $li[0]
+    }
+
+    addChoice($dropdown, label, value) {
+        // We split into terms and also add the full label to the trie to allow both
+        // searching on individual words and full labels
+        let data = {"label": label, "value": value}
+        let terms = label.split(" ")
+        terms.forEach((term) => {
+            this.searchTrie.insert(term, data)
+        })
+        this.searchTrie.insert(label, data)
     }
 
     processOptions(options) {
@@ -59,12 +112,6 @@ class SearchBar {
                 this.options[key] = options[key];
             }
         }
-
-        let allowed = ["trie", "filter"]
-        if (!allowed.includes(this.options.searchAlgorithm)) {
-            throw new Error(`Search algorithm must be one of ${allowed.join(", ")}. Provided: ${this.options.searchAlgorithm}`)
-        }
-
     }
 
     AttachSearchBar(element) {
@@ -80,37 +127,17 @@ class SearchBar {
         if (element instanceof jQuery) {
             $searchBar = element;
         }
-
-        // If the searchbar receives text do a search
-        $searchBar.on("input", () => {
-            let text = xss($searchBar.val());
-            // Sanitize the text to prevent XSS
-
-            if (text.length > 0) {
-                if (this.options.threshold <= text.length) {
-                    let searchResults = this.search(text)
-                    this.process($(searchResults), text)
-                } else {
-                    this.hideDropdown()
-                }
-            }
-        })
-
-        $searchBar.on("click", () => {
-            if ($(this.dropdown).is(":visible") && $(this.dropdown).find("li:visible").length === 0) {
-                this.hideDropdown()
-            }
-        })
         return $searchBar[0]
     }
 
 
     createDropdown() {
         let $dropdownContainer = $("<div>", {"class": "dropdown w-100"})
-        this.dropdownContainer = $dropdownContainer[0]
         this.searchBar.setAttribute("data-bs-toggle", "dropdown");
         this.searchBar.setAttribute("aria-expanded", "false");
         let $dropdownMenu = $("<ul>", {"class": "dropdown-menu w-100", "aria-labelledby": "dropdownMenuButton"})
+        $dropdownMenu.css("max-height", "300px").css("overflow-y", "auto")
+
         let $searchBar = $(this.searchBar)
 
         $searchBar.before($dropdownContainer)
@@ -122,7 +149,7 @@ class SearchBar {
 
         // for each choice add a button to the dropdown
         this.options.data.map((choice) => {
-            this.addChoice($dropdownMenu, choice.label, choice.value)
+            this.addChoice(choice.label, choice.value)
         })
 
 
@@ -130,68 +157,36 @@ class SearchBar {
     }
 
     search(text){
-        //TODO implement smarter algorithm selection
-        if (this.options.searchAlgorithm === "trie") {
-            return this.trieSearch(text)
-        } else if (this.options.searchAlgorithm === "filter") {
-            return this.filterSearch(text)
-        }
-        else {
-            throw new Error("Invalid search algorithm")
-        }
+        let $filteredItems = this.searchTrie.search(text).flat()
+
+        // Remove duplicate objects and return the unique ones.
+        return [...new Set($filteredItems.map(item => JSON.stringify(item)))].map(item => JSON.parse(item))
 
     }
 
-    trieSearch(text){
-        return this.searchTrie.search(text).flat()
-    }
 
-    process($filteredItems, text){
+    process(filteredItems, text){
+        let $filteredItems = $(filteredItems)
         let $dropdown = $(this.dropdown)
-        let dropdownVisible = false
         let shownItems = 0
 
-        // Iterate over the filtered collection using the .each() method
         $filteredItems.each((index, item) => {
             shownItems++
             if (shownItems <= this.options.maxItems) {
-                $(item).show()
-                this.colorText(text, $(item).find("button"))
-                dropdownVisible = true
-            } else {
-                $(item).hide()
+                let itemElement = this.attachItem($dropdown, item.label, item.value)
+                this.colorText(text, $(itemElement).find("button"))
             }
         })
-
-        if (dropdownVisible) {
-            if (!$dropdown.is(":visible")) {
-                this.showDropdown()
-            }
-        } else {
-            this.hideDropdown()
-        }
-    }
-
-    filterSearch(text) {
-        // Filter that checks if the text is in the label. Generally (much) slower than the trie search but
-        // allows to search throughout the whole label and not just the start of the label.
-        return [...this.dropdown.querySelectorAll("li")].filter((item, index) => {
-            let button = item.querySelector("button");
-            let label = button.textContent.toLowerCase();
-            return label.indexOf(text.toLowerCase()) !== -1;
-        })
-
-
     }
 
     /**
      * Color the text in the button that matches the search text
      * @param text
-     * @param button
+     * @param $button
      */
-    colorText(text, button) {
+    colorText(text, $button) {
         // Get the value of the button
-        let label = xss(button.data("value"))
+        let label = xss($button.text())
 
         // Match all the text that matches the search text
         let regex = new RegExp(text, "gi")
@@ -212,7 +207,7 @@ class SearchBar {
             lastIndex = index + text.length
         }
         newLabel += label.substring(lastIndex)
-        button.html(newLabel)
+        $button.html(newLabel)
     }
 }
 
