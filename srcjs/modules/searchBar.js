@@ -24,7 +24,7 @@ class SearchBar {
         this.attachLogic()
     }
 
-    attachLogic(){
+    attachLogic() {
         let $searchBar = $(this.searchBar)
         let $dropdown = $(this.dropdown)
 
@@ -52,8 +52,6 @@ class SearchBar {
                 this.hideDropdown()
             }
         })
-
-
 
         $searchBar.on("click", () => {
             if ($(this.dropdown).is(":visible") && $(this.dropdown).find("li:visible").length === 0) {
@@ -135,7 +133,11 @@ class SearchBar {
         let $dropdownContainer = $("<div>", {"class": "dropdown w-100"})
         this.searchBar.setAttribute("data-bs-toggle", "dropdown");
         this.searchBar.setAttribute("aria-expanded", "false");
-        let $dropdownMenu = $("<ul>", {"class": "dropdown-menu w-100", "aria-labelledby": "dropdownMenuButton"})
+        let $dropdownMenu = $("<ul>", {
+            "class": "dropdown-menu w-100",
+            "aria-labelledby": "dropdownMenuButton",
+            "role": "menu"
+        })
         $dropdownMenu.css("max-height", "300px").css("overflow-y", "auto")
 
         let $searchBar = $(this.searchBar)
@@ -156,7 +158,7 @@ class SearchBar {
         return $dropdownMenu[0]
     }
 
-    search(text){
+    search(text) {
         let $filteredItems = this.searchTrie.search(text).flat()
 
         // Remove duplicate objects and return the unique ones.
@@ -165,7 +167,7 @@ class SearchBar {
     }
 
 
-    process(filteredItems, text){
+    process(filteredItems, text) {
         let $filteredItems = $(filteredItems)
         let $dropdown = $(this.dropdown)
         let shownItems = 0
@@ -213,9 +215,9 @@ class Trie {
         this.resultMap = {}
     }
 
-    insert (word, result) {
+    insert(word, result) {
         word = word.toLowerCase();
-        if (word in this.resultMap){
+        if (word in this.resultMap) {
             this.resultMap[word].push(result)
         } else {
             this.resultMap[word] = [result]
@@ -229,7 +231,7 @@ class Trie {
         node.isEnd = true;
     }
 
-    search (word) {
+    search(word) {
         word = word.toLowerCase()
         let res = [];
         let node = this.root;
@@ -239,11 +241,11 @@ class Trie {
             else
                 return res;
         }
-        this.autocomplete(node, res, word.substring(0, word.length-1));
+        this.autocomplete(node, res, word.substring(0, word.length - 1));
         return res.map(re => this.resultMap[re]);
     }
 
-    autocomplete (node, res, prefix)  {
+    autocomplete(node, res, prefix) {
         if (node.isEnd)
             res.push(prefix + node.data);
         for (let c of node.children.keys())
