@@ -181,32 +181,19 @@ class SearchBar {
 
     /**
      * Color the text in the button that matches the search text
-     * @param text
+     * @param substring
      * @param $button
      */
-    colorText(text, $button) {
+    colorText(substring, $button) {
+        let regex = new RegExp(substring, "gi")
+
         // Get the value of the button
-        let label = xss($button.text())
+        let buttonText = xss($button.text())
 
-        // Match all the text that matches the search text
-        let regex = new RegExp(text, "gi")
+        // Replace all matches with the <span> element
+        let newLabel = buttonText.replace(regex, `<span class="text-primary">$&</span>`)
 
-        // Get the indexes of the matches
-        let matches = label.matchAll(regex)
-        let indexes = []
-        for (const match of matches) {
-            indexes.push(match.index)
-        }
-
-        let newLabel = ""
-        let lastIndex = 0
-        for (let i = 0; i < indexes.length; i++) {
-            let index = indexes[i]
-            newLabel += label.substring(lastIndex, index)
-            newLabel += `<span class="text-primary">${label.substring(index, index + text.length)}</span>`
-            lastIndex = index + text.length
-        }
-        newLabel += label.substring(lastIndex)
+        // Update the button's text
         $button.html(newLabel)
     }
 }
