@@ -205,21 +205,35 @@ function constructSearchBar(id, $container, choices) {
         new SearchBar(searchBarElement, {
             data: src,
             onSelectItem: (label, value) => {
-                let node = $("#" + id).find(".GroupedCheckBox-node").filter(function () {
-                    return $(this).text() === label
+                let $nodes = $("#" + id).find(".GroupedCheckBox-node")
+
+                // We have to find the node that has the value we want to select
+                let $clickedNodes = $nodes.filter(function () {
+                    return $(this).text().trim() === label
                 })
 
-                node.find("label").first().css("font-weight", "bold").addClass("text-primary").removeClass("text-fg")
-                if (lastClickedNode !== null) {
-                    lastClickedNode.find("label").first().css("font-weight", "normal").addClass("text-fg").removeClass("text-primary")
-                }
-                lastClickedNode = node
+                // Next we want to color the node
+                $clickedNodes.each(function () {
+                    let $node = $(this)
 
-                node.parentsUntil("#" + id, ".GroupedCheckBox-node")
-                    .children("." + styles.groupedCheckboxCaret + ".collapsed").click()
+                    // We want to color the node
+                    $node.find("label").first().css("font-weight", "bold").addClass("text-primary").removeClass("text-fg")
 
-                // Scroll to the node
-                node[0].scrollIntoView({behavior: "smooth", block: "center", inline: "center"})
+                    // We want to remove the color from the previously selected node if it exists
+                    if (lastClickedNode !== null) {
+                        lastClickedNode.find("label").first().css("font-weight", "normal").addClass("text-fg").removeClass("text-primary")
+                    }
+
+                    // Next we want to open all the carets of the parent nodes.
+                    $node.parentsUntil("#" + id, ".GroupedCheckBox-node")
+                        .children("." + styles.groupedCheckboxCaret + ".collapsed").click()
+
+                    // Next we want to scroll to the node
+                    $node[0].scrollIntoView({behavior: "smooth", block: "center", inline: "center"})
+
+                    // We are done processing this node so we set it as the last clicked node
+                    lastClickedNode = $node
+                })
             }
         })
 
