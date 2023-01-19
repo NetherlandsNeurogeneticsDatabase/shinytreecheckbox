@@ -209,10 +209,9 @@ function constructSearchBar(id, $container, choices) {
 
                 // We have to find the node that has the value we want to select
                 let $clickedNodes = $nodes.filter(function () {
-                    return $(this).text().trim() === label
+                    return $(this).children("label").text() === label
                 })
 
-                // Next we want to color the node
                 $clickedNodes.each(function () {
                     let $node = $(this)
 
@@ -224,7 +223,7 @@ function constructSearchBar(id, $container, choices) {
                         lastClickedNode.find("label").first().css("font-weight", "normal").addClass("text-fg").removeClass("text-primary")
                     }
 
-                    // Next we want to open all the carets of the parent nodes.
+                    // We want to open all the carets that are parents of the clicked node.
                     $node.parentsUntil("#" + id, ".GroupedCheckBox-node")
                         .children("." + styles.groupedCheckboxCaret + ".collapsed").click()
 
