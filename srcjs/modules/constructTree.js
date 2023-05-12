@@ -4,17 +4,21 @@
 where each node represents a level and each node's children represent the next level */
 class ConstructTree {
     root
-    constructor(data, levels) {
-        this.buildTreeHash(data, levels)
-    }
+    constructor(data, levels, isJSON) {
 
+        if (isJSON){
+            this.treeFromJSON(data)
+        } else {
+            this.treeFromDataFrame(data, levels)
+        }
+    }
 
 /**
  * > The function takes in a data set and a list of levels, and builds a tree with the data set
  * @param data - the data you want to build the tree from
  * @param levels - an array of strings that represent the levels of the tree.
  */
-    buildTreeHash(data, levels) {
+    treeFromDataFrame(data, levels) {
         let root = new Node("root")
         let nodes = { "root": root }
 
@@ -32,6 +36,26 @@ class ConstructTree {
         })
         this.root = root
     }
+
+    iterObject(data, parent=null){
+        for (const key of Object.keys(data)) {
+            let value = key
+            if (Array.isArray(data)){
+                value = data[key]
+            }
+            let node = new Node(value, [], parent)
+            parent.add_child(node)
+            if (typeof (data[key]) === "object") {
+                this.iterObject(data[key], node)
+            }
+        }
+    }
+    treeFromJSON(data) {
+        let root = new Node("root")
+        this.iterObject(data, root)
+        this.root = root
+    }
+
 
 
 
@@ -104,8 +128,6 @@ class ConstructTree {
         }
         return [node, find]
     }
-
-
 }
 
 

@@ -8,13 +8,17 @@
 
 import xss from "xss";
 
+let times = []
+
 class SearchBar {
     options = {
         searchThreshold: 1,
         data: [],
         onSelectItem: null,
         maxItems: 100,
+        searchAlgorithm: "jSearch"
     }
+    searchAlgorithm
 
     constructor(element, options = {}) {
         this.processOptions(options);
@@ -22,6 +26,20 @@ class SearchBar {
         this.searchBar = this.AttachSearchBar(element);
         this.dropdown = this.createDropdown();
         this.attachLogic()
+        this.setSearchAlgorithm(this.options.searchAlgorithm)
+    }
+
+    setSearchAlgorithm(algorithm) {
+        let allowed = ["jSearch", "trie"]
+        if (!allowed.includes(algorithm)) {
+            throw new Error("Invalid search algorithm")
+        }
+        if (algorithm === "jSearch") {
+            this.search = this.jSearch
+        } else if (algorithm === "trie") {
+            this.search = this.searchTrie
+
+        }
     }
 
     attachLogic() {
@@ -40,7 +58,29 @@ class SearchBar {
             // We only want to process the text if the threshold is reached
             let nSearchResults = 0
             if (text.length >= this.options.searchThreshold) {
-                let searchResults = this.search(text)
+                // Measure the time it takes to search
+                let startTime = window.performance.now()
+                console.time("search jSearch")
+                let searchResults = this.jSearch(text)
+                console.timeEnd("search jSearch")
+                let elapsedTime = window.performance.now() - startTime
+                times.push({
+                    "searchTime": elapsedTime,
+                    "searchTimeUnit": "ms",
+                    "searchString": text,
+                    "method": "jSearch"})
+
+                startTime = window.performance.now()
+                console.time("search trie")
+                searchResults = this.jSearch(text)
+                console.timeEnd("search trie")
+                elapsedTime = window.performance.now() - startTime
+                times.push({
+                    "searchTime": elapsedTime,
+                    "searchTimeUnit": "ms",
+                    "searchString": text,
+                    "method": "trie"})
+                console.log(times)
                 this.process(searchResults, text)
                 nSearchResults = searchResults.length
             }
@@ -128,7 +168,12 @@ class SearchBar {
         return $searchBar[0]
     }
 
-
+    jSearch(text) {
+        text = text.toLowerCase()
+        return this.options.data.filter((item) => {
+            return item.label.toLowerCase().includes(text)
+        })
+    }
     createDropdown() {
         let $dropdownContainer = $("<div>", {"class": "dropdown w-100"})
         this.searchBar.setAttribute("data-bs-toggle", "dropdown");
@@ -150,6 +195,7 @@ class SearchBar {
         $dropdownContainer.append($dropdownMenu)
 
         // for each choice add a button to the dropdown
+
         this.options.data.map((choice) => {
             this.addChoice(choice.label, choice.value)
         })
@@ -158,7 +204,7 @@ class SearchBar {
         return $dropdownMenu[0]
     }
 
-    search(text) {
+    searchTrie(text) {
         let $filteredItems = this.searchTrie.search(text).flat()
 
         // Remove duplicate objects and return the unique ones.

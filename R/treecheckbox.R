@@ -24,8 +24,7 @@
 #' @import htmlwidgets
 #' @importFrom jsonlite toJSON
 #' @export
-treecheckbox <- function(id, label, choices, levels, collapsed = FALSE, selected = NULL, include_mode = FALSE, select_buttons = TRUE, search_bar = TRUE, width = NULL, height = NULL) {
-
+treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, selected = NULL, include_mode = FALSE, select_buttons = TRUE, search_bar = TRUE, width = NULL, height = NULL) {
   # Validate arguments first
   # validateArgs(id, label, choices, levels, collapsed, selected, width, height)
 
@@ -40,20 +39,26 @@ treecheckbox <- function(id, label, choices, levels, collapsed = FALSE, selected
     stop("label must be a string")
   }
 
-  # Validate if choices is a dataframe. If not provide a warning and try to convert to dataframe. Else stop.
-  if (!is.data.frame(choices)) {
-    if (is.list(choices)) {
-      warning("choices is not a dataframe. Trying to convert to dataframe.")
-      choices = as.data.frame(choices)
-    } else {
-      stop("choices must be a dataframe")
-    }
+  # if choices is a dataframe we levels can't be an empty vector
+  if (is.data.frame(choices) && length(levels) == 0) {
+      stop("levels can't be an empty vector if choices is a dataframe")
   }
 
-  # Validate if levels is a vector. Else stop.  
-  if (!is.vector(levels)) {
-    stop("levels must be a vector")
-  }
+
+#   Validate if choices is a dataframe or a stringified JSON. Else stop.
+#   if (!is.data.frame(choices) && !is.list(choices)) {
+#     stop("choices must be a dataframe or a stringified JSON")
+#   if (!is.data.frame(choices)) {
+#     if (is.list(choices)) {
+#       warning("choices is not a dataframe. Or stringified JSON. Trying to convert to dataframe.")
+#       choices = as.data.frame(choices)
+#     } else {
+#       stop("choices must be a dataframe")
+#     }
+#   }
+    if (is.data.frame(choices) && !is.vector(levels)) {
+      stop("levels must be a vector")
+    }
 
   collapsed <- validate_logical_or_vector(collapsed, sprintf("Argument:'collapsed' should be logical or a vector. You provided %s", typeof(collapsed)))
   selected <- validate_logical_or_vector(selected, sprintf("Argument:'selected' should be logical or a vector. You provided %s", typeof(selected)))
@@ -67,8 +72,11 @@ treecheckbox <- function(id, label, choices, levels, collapsed = FALSE, selected
     selected = selected,
     includeMode = include_mode,
     select_buttons = select_buttons,
-    search_bar = search_bar
+    search_bar = search_bar,
+    isJSON = !is.data.frame(choices)
   )
+
+  print(variables$isJSON)
 
   # create widget
   htmlwidgets::createWidget(

@@ -2,9 +2,6 @@ import styles from './tree.css'
 import $ from 'jquery';
 import SearchBar from "./searchBar";
 
-// import "chosen-js"
-
-// import {Autocomplete} from "./autocomplete";
 
 /* A function that generates a unique ID. */
 let generateID = (function (n) {
@@ -63,12 +60,10 @@ function createCheckboxLabel(nodeName, id) {
  * checkboxes
  * @returns A div with two buttons.
  */
-function generateSelectButtons(id, isHierarchical, includeMode, searchBar, choices) {
+function generateSelectButtons(id, isHierarchical, includeMode, searchBar, flattenedChoices) {
 
     let $container = $("<div>", {"class": "d-flex justify-content-evenly w-100"})
-    // let $container = $("<div>")
     let generatedID = generateID()
-
 
     constructDropdownSelect(id, $container, generatedID, includeMode)
 
@@ -77,7 +72,7 @@ function generateSelectButtons(id, isHierarchical, includeMode, searchBar, choic
     }
 
     if (searchBar === true) {
-        constructSearchBar(id, $container, choices, includeMode, isHierarchical)
+        constructSearchBar(id, $container, flattenedChoices)
     }
 
     return ($container)
@@ -136,6 +131,7 @@ function constructDropdownSelect(id, $container, generatedID, includeMode) {
 
 
 function constructDropdownCollapse(id, $container, generatedID) {
+    console.log("constructDropdownCollapse")
     let $dropdown = $("<div>", {"class": "dropdown dropdown-select"})
     let $dropDownCollapseButton = $("<button>", {
         "class": "btn btn-outline-fg dropdown-toggle ",
@@ -158,7 +154,7 @@ function constructDropdownCollapse(id, $container, generatedID) {
     $container.append($dropdown)
 }
 
-function constructSearchBar(id, $container, choices) {
+function constructSearchBar(id, $container, flattenedChoices) {
     function hideSearchButton() {
         $searchButton.hide()
         $searchBar.show()
@@ -186,22 +182,21 @@ function constructSearchBar(id, $container, choices) {
     $container.append($searchBar)
 
     $container.ready(function () {
-        // Flatten choices
         let inSrc = []
         let src = []
-        for (let i = 0; i < choices.length; i++) {
-            for (let key in choices[i]) {
-                let value = choices[i][key]
-                if (inSrc.includes(value) === false) {
-                    inSrc.push(value)
-                    src.push({"label": value, "value": value})
-                }
+
+        for (let i = 0; i < flattenedChoices.length; i++) {
+            let value = flattenedChoices[i]
+            if (inSrc.includes(value) === false) {
+                inSrc.push(value)
+                src.push({"label": value, "value": value})
             }
         }
 
         // Create the search bar and logic
         let searchBarElement = $searchBar[0]
         let lastClickedNode = null
+
         new SearchBar(searchBarElement, {
             data: src,
             onSelectItem: (label, value) => {

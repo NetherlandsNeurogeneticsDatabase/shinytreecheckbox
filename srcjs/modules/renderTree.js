@@ -86,20 +86,31 @@ function collapseNodes(id, collapsed) {
  * @param renderSelectButtons - A boolean that determines whether the select buttons should be rendered
  * @param renderSearchBar - A boolean that determines whether the search bar should be rendered
  */
-function createTree(id, label, choices, levels, collapsed, selected, includeMode, renderSelectButtons, renderSearchBar){
+function createTree(id, label, choices, levels, collapsed, selected, includeMode, renderSelectButtons, renderSearchBar, isJSON){
+    if (isJSON) {
+        // Parse the JSON string
+        choices = JSON.parse(choices)
+    }
+
+    // Determine whether the tree is hierarchical or not
+    let isHierarchical = levels.length > 1 || isJSON
+
+
+    let flattenedChoices = flattenChoices(choices, levels, isJSON)
+
     let $base = $("#" + id)
 
     if (label){
         $base.append("<h4>" + label + "</h4>")
     }
     if (renderSelectButtons === true){
-        $base.append(generateSelectButtons(id, levels.length > 1, includeMode, renderSearchBar, choices))
+        // is hierarchical can be used to determine whether the select buttons should be rendered
+        $base.append(generateSelectButtons(id, isHierarchical, includeMode, renderSearchBar, flattenedChoices))
     }
 
     $base.data("includeMode", includeMode)
 
-
-    let tree = parseTree(choices, levels)
+    let tree = parseTree(choices, levels, isJSON)
 
     let $nodeContainer = $("<div>", {"class": styles.groupedCheckboxNodeHolder + " overflow-auto align-self-center"})
     $base.append($nodeContainer)
@@ -107,21 +118,13 @@ function createTree(id, label, choices, levels, collapsed, selected, includeMode
     // Render and append the nodes
     appendNodes($nodeContainer.get(0), tree, includeMode)
 
-
-
-
-
-
     // Check which nodes should be selected
     preSelectNodes(id, selected, includeMode)
 
-
-
-    // Hide the nodes
-    if (levels.length > 1){
+    // Hide the nodes that should be collapsed
+    if (isHierarchical){
         collapseNodes(id, collapsed)
     }
-
 
     $(document).on("shiny:connected", function() {
         registerEvents(id)
@@ -129,6 +132,40 @@ function createTree(id, label, choices, levels, collapsed, selected, includeMode
     });
 
 }
+
+function flattenChoices(data, levels = c(), isJSON=false){
+    let flattened = []
+    if (isJSON){
+        flattenJSON(data, flattened)
+    } else {
+        flattenDataFrame(data, levels, flattened)
+    }
+    return flattened
+}
+
+function flattenDataFrame(data, levels, flattened){
+    data.forEach(record => {
+        levels.forEach(level => {
+            let value = record[level]
+            flattened.push(value)
+        })
+    })
+}
+function flattenJSON(data, flattened){
+    // itterate over the data keys
+    for (const key of Object.keys(data)) {
+        let value = key
+        if (Array.isArray(data)){
+            value = data[key]
+        }
+        flattened.push(value)
+        if (typeof (data[key]) === "object") {
+            flattenJSON(data[key], flattened)
+        }
+    }
+}
+
+
 
 /**
  * It takes an element and an animation type, and toggles the visibility of the element's siblings
@@ -376,10 +413,11 @@ function registerEvents(id){
  * of the `ConstructTree` class
  * @param choices - an Object with the data that will be used.
  * @param levels - the number of levels in the tree
+ * @param isJSON - a boolean value that indicates if the data is in JSON format
  * @returns A ConstructTree object
  */
-function parseTree(choices, levels){
-    return new ConstructTree(choices, levels)
+function parseTree(choices, levels, isJSON){
+    return new ConstructTree(choices, levels, isJSON)
 }
 
 /**

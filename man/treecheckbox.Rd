@@ -8,7 +8,7 @@ treecheckbox(
   id,
   label,
   choices,
-  levels,
+  levels = c(),
   collapsed = FALSE,
   selected = NULL,
   include_mode = FALSE,
