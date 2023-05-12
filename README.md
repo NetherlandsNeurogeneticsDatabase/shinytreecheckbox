@@ -5,7 +5,7 @@
 Install library using devtools:   
 ```R
 install.packages("devtools")
-devtools::githubinstall("devalk96/shinytreecheckbox")
+devtools::githubinstall("NetherlandsNeurogeneticsDatabase/shinytreecheckbox")
 ```
 
 ## Usage
