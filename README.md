@@ -42,6 +42,13 @@ treecheckbox(id = ns("example_treecheckbox2"),
 ```
 ![Include and Exclude results](https://raw.githubusercontent.com/devalk96/shinytreecheckbox/media/images/treecheckbox_example2.jpg)
 
+
+### Using a stringified JSON object and adding a search bar.
+```R
+treecheckbox(id = ns("select_JSON_debug"), label = "", choices = "{\"Dogs\":[\"Labrador\",\"Husky\"],\"Birds\":{\"Raptors\":{\"eagles\":[\"serpenteagle\",\"bootedeagle\"],\"falcons\":{\"kestrels\":[\"malagasykestrel\",\"commonkestrel\",\"rockkestrel\"]}}}}", collapsed = TRUE, selected = FALSE, include_mode = TRUE, search_bar = TRUE),
+```
+
+![JSON + Searchbar](https://raw.githubusercontent.com/NetherlandsNeurogeneticsDatabase/shinytreecheckbox/media/images/example3.jpg)
 ### Get input
 `observeEvent()` can be used to react on change:
 
@@ -75,8 +82,8 @@ Note: This example is very bare in layout.
 |----------------|----------|---------|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `ID`           | NO       | None    | `character`         | The `input` slot that will be used to access the value.                                                                                                                                                                                  |
 | `label`        | YES      | None    | `character`         | The label that will be displayed. If `NULL` is provided, no label will be added.                                                                                                                                                         |
-| `choices`      | NO       | None    | `data.frame`/`list` | A `dataframe` or `list` that will be used to generate the checkboxes.                                                                                                                                                                    |
-| `levels`       | NO       | None    | `vector`            | A `vector` which contains the columnames that will be used to find hierarchy in the data, this vector should be ordered from large groups --> subgroups (a single group that contains the data, also known as the 'root' is not needed). |
+| `choices`      | NO       | None    | `data.frame`/`list` or stringified `JSON` | A `dataframe`, `list` or stringified `JSON` that will be used to generate the checkboxes.                                                                                                                                                                    |
+| `levels`       | NO | `c()`    | `vector`            | A `vector` which contains the columnames that will be used to find hierarchy in the data, this vector should be ordered from large groups --> subgroups (a single group that contains the data, also known as the 'root' is not needed). This is not needed when a stringified JSON file is provided. |
 | `collapsed`    | YES      | `FALSE` | `logical`/`vector`  | Can be `logical` to hide or show all groups, or a `vector` which will hide the provided checkbox.                                                                                                                                        |
 | `selected`     | YES      | `TRUE`  | `logical`/`vector`  | Can be `logical` to (de)select all groups, or a `vector` which will select the provided checkbox.                                                                                                                                        |
 | `include_mode` | YES      | `FALSE` | `logical`           | Include mode will generate another button which will allow to include or exclude the checkbox.                                                                                                                                           |                                                                                                                                         
