@@ -131,7 +131,6 @@ function constructDropdownSelect(id, $container, generatedID, includeMode) {
 
 
 function constructDropdownCollapse(id, $container, generatedID) {
-    console.log("constructDropdownCollapse")
     let $dropdown = $("<div>", {"class": "dropdown dropdown-select"})
     let $dropDownCollapseButton = $("<button>", {
         "class": "btn btn-outline-fg dropdown-toggle ",

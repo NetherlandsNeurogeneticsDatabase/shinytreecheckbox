@@ -8,8 +8,6 @@
 
 import xss from "xss";
 
-let times = []
-
 class SearchBar {
     options = {
         searchThreshold: 1,
@@ -59,28 +57,7 @@ class SearchBar {
             let nSearchResults = 0
             if (text.length >= this.options.searchThreshold) {
                 // Measure the time it takes to search
-                let startTime = window.performance.now()
-                console.time("search jSearch")
                 let searchResults = this.jSearch(text)
-                console.timeEnd("search jSearch")
-                let elapsedTime = window.performance.now() - startTime
-                times.push({
-                    "searchTime": elapsedTime,
-                    "searchTimeUnit": "ms",
-                    "searchString": text,
-                    "method": "jSearch"})
-
-                startTime = window.performance.now()
-                console.time("search trie")
-                searchResults = this.jSearch(text)
-                console.timeEnd("search trie")
-                elapsedTime = window.performance.now() - startTime
-                times.push({
-                    "searchTime": elapsedTime,
-                    "searchTimeUnit": "ms",
-                    "searchString": text,
-                    "method": "trie"})
-                console.log(times)
                 this.process(searchResults, text)
                 nSearchResults = searchResults.length
             }
