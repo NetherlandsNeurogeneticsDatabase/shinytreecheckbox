@@ -44,18 +44,6 @@ treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, se
       stop("levels can't be an empty vector if choices is a dataframe")
   }
 
-
-#   Validate if choices is a dataframe or a stringified JSON. Else stop.
-#   if (!is.data.frame(choices) && !is.list(choices)) {
-#     stop("choices must be a dataframe or a stringified JSON")
-#   if (!is.data.frame(choices)) {
-#     if (is.list(choices)) {
-#       warning("choices is not a dataframe. Or stringified JSON. Trying to convert to dataframe.")
-#       choices = as.data.frame(choices)
-#     } else {
-#       stop("choices must be a dataframe")
-#     }
-#   }
     if (is.data.frame(choices) && !is.vector(levels)) {
       stop("levels must be a vector")
     }
@@ -75,8 +63,6 @@ treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, se
     search_bar = search_bar,
     isJSON = !is.data.frame(choices)
   )
-
-  print(variables$isJSON)
 
   # create widget
   htmlwidgets::createWidget(
