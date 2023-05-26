@@ -58,7 +58,6 @@ observeEvent(input$thisisanid, {
   }
 )
 ```
-
 NOTE:  
 If include_mode is TRUE, the input will return a list with two names:
 ```r 
@@ -69,6 +68,18 @@ observeEvent(input$thisisanid, {
   }
 )
 ```
+
+### Get click input (`clickable_labels`)  
+*For this to work `clickable_labels` should be set to TRUE*  
+Add '_click' to the input id. Whenever a user clicks on a label the clicked label will be pushed to this input variable.
+```r
+observeEvent(input$thisisanid_click, {
+  print(input$thisisanid_click)
+  }
+)
+```
+
+
 
 ### Example
 View an example by running:
@@ -83,9 +94,9 @@ Note: This example is very bare in layout.
 | `ID`           | NO       | None    | `character`         | The `input` slot that will be used to access the value.                                                                                                                                                                                  |
 | `label`        | YES      | None    | `character`         | The label that will be displayed. If `NULL` is provided, no label will be added.                                                                                                                                                         |
 | `choices`      | NO       | None    | `data.frame`/`list` or stringified `JSON` | A `dataframe`, `list` or stringified `JSON` that will be used to generate the checkboxes.                                                                                                                                                                    |
-| `levels`       | NO | `c()`    | `vector`            | A `vector` which contains the columnames that will be used to find hierarchy in the data, this vector should be ordered from large groups --> subgroups (a single group that contains the data, also known as the 'root' is not needed). This is not needed when a stringified JSON file is provided. |
+| `levels`       | NO | `c()`    | `vector`            | A `vector` which contains the columnames that will be used to find hierarchy in the data, this vector should be ordered from large groups --> subgroups (a single group that contains the data, also known as the 'root' is not needed). **This is not needed when a stringified JSON file is provided.** |
 | `collapsed`    | YES      | `FALSE` | `logical`/`vector`  | Can be `logical` to hide or show all groups, or a `vector` which will hide the provided checkbox.                                                                                                                                        |
 | `selected`     | YES      | `TRUE`  | `logical`/`vector`  | Can be `logical` to (de)select all groups, or a `vector` which will select the provided checkbox.                                                                                                                                        |
 | `include_mode` | YES      | `FALSE` | `logical`           | Include mode will generate another button which will allow to include or exclude the checkbox.                                                                                                                                           |                                                                                                                                         
-| `search_bar`        | YES      | `TRUE`    | `logical`         | A search bar will be rendered |                                                                                                                                                        |
-
+| `search_bar`        | YES      | `TRUE`    | `logical`         | A search bar will be rendered |                                                                                                                                                        
+| `clickable_labels`        | YES      | `FALSE`    | `logical`         | If enabled it a click signal will be send to $ID_click input variable |                                                                                                                                                        |
