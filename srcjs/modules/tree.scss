@@ -37,6 +37,11 @@
   outline: none;
 }
 
+:local .clickableLabel:hover{
+  cursor: pointer;
+  text-decoration: underline;
+}
+
 :local .btnHelpLabel{
     border: 1px solid #cccccc;
     border-left: 0;
