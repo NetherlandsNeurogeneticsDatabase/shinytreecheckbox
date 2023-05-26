@@ -40,6 +40,8 @@ treecheckbox(
 \item{search_bar}{Logical; If \code{TRUE} a search bar will be rendered}
 
 \item{clickableLabel}{Logical; If \code{TRUE} clicking on the label will set the value of \if{html}{\out{<id>}}_click to the label value.}
+
+\item{renderCheckbox}{Logical; If \code{TRUE} the checkboxes will be rendered. If \code{FALSE} only the labels will be rendered.}
 }
 \description{
 Creates the checkboxes.

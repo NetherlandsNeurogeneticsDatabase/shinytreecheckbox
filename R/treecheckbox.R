@@ -12,6 +12,7 @@
 #' @param select_buttons Logical; If \code{TRUE} helper buttons will be rendered to select all or none, collapse or expand.
 #' @param search_bar Logical; If \code{TRUE} a search bar will be rendered
 #' @param clickableLabel Logical; If \code{TRUE} clicking on the label will set the value of <id>_click to the label value.
+#' @param renderCheckbox Logical; If \code{TRUE} the checkboxes will be rendered. If \code{FALSE} only the labels will be rendered.
 #' @examples
 #' library(shiny)
 #' library(shinytreecheckbox)
