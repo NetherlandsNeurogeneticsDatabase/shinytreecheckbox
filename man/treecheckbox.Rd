@@ -14,7 +14,7 @@ treecheckbox(
   include_mode = FALSE,
   select_buttons = TRUE,
   search_bar = TRUE,
-  clickableLabels = FALSE,
+  clickable_labels = FALSE,
   width = NULL,
   height = NULL
 )
