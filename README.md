@@ -69,7 +69,7 @@ observeEvent(input$thisisanid, {
 )
 ```
 
-###clickable_labels/links
+###clickable_labels/links  
 *For this to work `clickable_labels` should be set to TRUE*  
 Add '_click' to the input id. Whenever a user clicks on a label the clicked label will be pushed to this input variable.
 ```r
