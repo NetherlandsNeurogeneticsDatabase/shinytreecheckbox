@@ -1,7 +1,7 @@
 import styles from './tree.css'
 import $ from 'jquery';
 import SearchBar from "./searchBar";
-
+import "shiny";
 
 /* A function that generates a unique ID. */
 let generateID = (function (n) {
@@ -45,14 +45,33 @@ function createInputCheckbox(nodeName, nodeID) {
  * createCheckboxLabel creates a label for a checkbox
  * @param nodeName - the name of the node
  * @param id - the id of the node
+ * @param clickable
+ * @param widgetId
  * @returns A label element
  */
-function createCheckboxLabel(nodeName, id) {
+function createCheckboxLabel(nodeName, id, clickable, widgetId) {
     let labelCheckbox = document.createElement("label")
     labelCheckbox.classList.add("form-check-label")
     labelCheckbox.for = "node-input-check" + id
     labelCheckbox.innerHTML = nodeName
+
+    if (clickable === true) {
+        labelCheckbox.classList.add(styles.clickableLabel)
+
+        // We want to prevent the default behaviour of the label, which is to check the checkbox. Instead, we want to
+        // set the value of the clickInput to the value of the label.
+        labelCheckbox.addEventListener("click", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            setClickInput(widgetId, nodeName);
+        })
+        }
     return (labelCheckbox)
+}
+
+function setClickInput(id, value){
+    let clickInputID = id + "_click"
+    Shiny.setInputValue(clickInputID, value, {priority: "event"});
 }
 
 /**

@@ -85,8 +85,11 @@ function collapseNodes(id, collapsed) {
  * @param includeMode - A boolean that determines whether the checkboxes have an include/exclude mode
  * @param renderSelectButtons - A boolean that determines whether the select buttons should be rendered
  * @param renderSearchBar - A boolean that determines whether the search bar should be rendered
+ * @param isJSON - A boolean that determines whether the choices are in JSON format
+ * @param clickableLabels - A boolean that determines whether the labels are clickable or not.
+ * Meaning that if the user clicks on the label, the value will be sent to a shiny input.
  */
-function createTree(id, label, choices, levels, collapsed, selected, includeMode, renderSelectButtons, renderSearchBar, isJSON){
+function createTree(id, label, choices, levels, collapsed, selected, includeMode, renderSelectButtons, renderSearchBar, isJSON, clickableLabels){
     if (isJSON) {
         // Parse the JSON string
         choices = JSON.parse(choices)
@@ -109,6 +112,7 @@ function createTree(id, label, choices, levels, collapsed, selected, includeMode
     }
 
     $base.data("includeMode", includeMode)
+    $base.data("clickableLabels", clickableLabels)
 
     let tree = parseTree(choices, levels, isJSON)
 
@@ -116,7 +120,7 @@ function createTree(id, label, choices, levels, collapsed, selected, includeMode
     $base.append($nodeContainer)
 
     // Render and append the nodes
-    appendNodes($nodeContainer.get(0), tree, includeMode)
+    appendNodes($nodeContainer.get(0), tree, includeMode, id, clickableLabels)
 
     // Check which nodes should be selected
     preSelectNodes(id, selected, includeMode)
@@ -213,8 +217,9 @@ function setInput(id){
     }
 
     Shiny.setInputValue(id, selectedValues, {priority: "event"});
-
 }
+
+
 
 function getInputRegular(id){
     let $base = $("#" + id)
@@ -360,7 +365,7 @@ function registerEvents(id){
             }
         })
     })
-    
+
 
     // Collapse all button
     $base.find(".grouped-checkbox-collapse-all").on("click", function(){
@@ -394,10 +399,12 @@ function registerEvents(id){
 
     // If label is clicked, check the checkbox and its children checkboxes
     $base.find("." + "form-check-label").on("click", function(){
-        if ($base.data("includeMode") === true){
-            $(this).siblings("." + styles.btnInclude).trigger("click")
-        } else {
-            $(this).siblings(".grouped-checkbox-input").trigger("click")
+        if ($base.data("clickableLabels") === false){
+            if ($base.data("includeMode") === true){
+                $(this).siblings("." + styles.btnInclude).trigger("click")
+            } else {
+                $(this).siblings(".grouped-checkbox-input").trigger("click")
+            }
         }
     })
 
@@ -424,12 +431,13 @@ function parseTree(choices, levels, isJSON){
  * > This function takes a tree Object and appends the nodes to the DOM
  * @param parent - the parent element to append the nodes to
  * @param tree - the tree object
- * @param includeMode
+ * @param includeMode - a boolean value that indicates if the widget is in include mode
+ * @param widgetId - the id of the widget
+ * @param clickableLabels - a boolean value that indicates if the labels are clickable (send input to shiny)
  */
-function appendNodes(parent, tree, includeMode) {
+function appendNodes(parent, tree, includeMode, widgetId, clickableLabels) {
     let base = $(parent)
     base.append($("<ul>", {"class": styles.groupedCheckboxList, "id": "grouped-checkbox-list-base"}))
-
 
     let queue = []
     queue.push(tree.root)
@@ -443,11 +451,11 @@ function appendNodes(parent, tree, includeMode) {
             for (let child of current.children) {
                 queue.push(child)
                 if (child.parent.value === "root") {
-                    child.htmlID = constructNode(child.value, null, child.has_children, base, includeMode)
+                    child.htmlID = constructNode(child.value, null, child.has_children, base, includeMode, clickableLabels, widgetId)
 
                 }
                 else {
-                    child.htmlID = constructNode(child.value, child.parent, child.has_children, base, includeMode)
+                    child.htmlID = constructNode(child.value, child.parent, child.has_children, base, includeMode, clickableLabels, widgetId)
                 }
 
             }
@@ -462,11 +470,13 @@ function appendNodes(parent, tree, includeMode) {
  * @param hasChildren - boolean
  * @param base
  * @param include
+ * @param clickableLabels
+ * @param widgetId
  * @returns The ID of the node that was just created.
  */
-function constructNode(nodeName, nodeParent, hasChildren, base, include){
+function constructNode(nodeName, nodeParent, hasChildren, base, include, clickableLabels, widgetId){
     // this function uses plain JS which increases the speed it takes to render the nodes by four times in comparison
-    // with the more readable jquery    
+    // with the more readable jquery
 
     let parent;
     if (!nodeParent){
@@ -491,8 +501,7 @@ function constructNode(nodeName, nodeParent, hasChildren, base, include){
 
     if (hasChildren){
         node.appendChild(createCaret())
-    } 
-
+    }
 
     // get a regex to check nodeName contains for example <e7> or <e8> and convert it to a unicode character
     let regex = /<e\d>/g
@@ -505,15 +514,14 @@ function constructNode(nodeName, nodeParent, hasChildren, base, include){
     // nodeName = nodeName.replace(/<e7>/g, "ç")
 
 
-
     // Check if 'include' is true or false
     if (include === true){
         node.appendChild(generateMultiStateCheckbox(nodeName,"unchecked"))
     } else {
         node.appendChild(createInputCheckbox(nodeName, nNodes))
     }
-    node.appendChild(createCheckboxLabel(nodeName, nNodes))
-        
+    node.appendChild(createCheckboxLabel(nodeName, nNodes, clickableLabels, widgetId))
+
 
     if (hasChildren){
         let newList = document.createElement("ul")

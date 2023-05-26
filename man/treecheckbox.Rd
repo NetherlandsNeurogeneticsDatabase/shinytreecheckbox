@@ -14,6 +14,7 @@ treecheckbox(
   include_mode = FALSE,
   select_buttons = TRUE,
   search_bar = TRUE,
+  clickableLabels = FALSE,
   width = NULL,
   height = NULL
 )
@@ -36,6 +37,8 @@ treecheckbox(
 \item{select_buttons}{Logical; If \code{TRUE} helper buttons will be rendered to select all or none, collapse or expand.}
 
 \item{search_bar}{Logical; If \code{TRUE} a search bar will be rendered}
+
+\item{clickableLabel}{Logical; If \code{TRUE} clicking on the label will set the value of \if{html}{\out{<id>}}_click to the label value.}
 }
 \description{
 Creates the checkboxes.

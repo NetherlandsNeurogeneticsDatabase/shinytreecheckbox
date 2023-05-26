@@ -11,6 +11,7 @@
 #' @param include_mode Logical; If \code{TRUE} the checkboxes will be rendered with include/exclude mode.
 #' @param select_buttons Logical; If \code{TRUE} helper buttons will be rendered to select all or none, collapse or expand.
 #' @param search_bar Logical; If \code{TRUE} a search bar will be rendered
+#' @param clickableLabel Logical; If \code{TRUE} clicking on the label will set the value of <id>_click to the label value.
 #' @examples
 #' library(shiny)
 #' library(shinytreecheckbox)
@@ -24,10 +25,9 @@
 #' @import htmlwidgets
 #' @importFrom jsonlite toJSON
 #' @export
-treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, selected = NULL, include_mode = FALSE, select_buttons = TRUE, search_bar = TRUE, width = NULL, height = NULL) {
+treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, selected = NULL, include_mode = FALSE, select_buttons = TRUE, search_bar = TRUE, clickableLabels = FALSE, width = NULL, height = NULL) {
   # Validate arguments first
   # validateArgs(id, label, choices, levels, collapsed, selected, width, height)
-
 
   # Validate if id is a string
   if (!is.character(id)) {
@@ -61,7 +61,8 @@ treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, se
     includeMode = include_mode,
     select_buttons = select_buttons,
     search_bar = search_bar,
-    isJSON = !is.data.frame(choices)
+    isJSON = !is.data.frame(choices),
+    clickableLabels = clickableLabels
   )
 
   # create widget
