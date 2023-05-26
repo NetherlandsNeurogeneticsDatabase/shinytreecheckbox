@@ -15,6 +15,7 @@ treecheckbox(
   select_buttons = TRUE,
   search_bar = TRUE,
   clickable_labels = FALSE,
+  render_checkbox = TRUE,
   width = NULL,
   height = NULL
 )

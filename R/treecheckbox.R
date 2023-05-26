@@ -25,7 +25,7 @@
 #' @import htmlwidgets
 #' @importFrom jsonlite toJSON
 #' @export
-treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, selected = NULL, include_mode = FALSE, select_buttons = TRUE, search_bar = TRUE, clickable_labels = FALSE, width = NULL, height = NULL) {
+treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, selected = NULL, include_mode = FALSE, select_buttons = TRUE, search_bar = TRUE, clickable_labels = FALSE, render_checkbox = TRUE, width = NULL, height = NULL) {
   # Validate arguments first
   # validateArgs(id, label, choices, levels, collapsed, selected, width, height)
 
@@ -62,7 +62,8 @@ treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, se
     select_buttons = select_buttons,
     search_bar = search_bar,
     isJSON = !is.data.frame(choices),
-    clickableLabels = clickable_labels
+    clickableLabels = clickable_labels,
+    renderCheckbox = render_checkbox
   )
 
   # create widget

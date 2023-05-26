@@ -89,7 +89,7 @@ function collapseNodes(id, collapsed) {
  * @param clickableLabels - A boolean that determines whether the labels are clickable or not.
  * Meaning that if the user clicks on the label, the value will be sent to a shiny input.
  */
-function createTree(id, label, choices, levels, collapsed, selected, includeMode, renderSelectButtons, renderSearchBar, isJSON, clickableLabels){
+function createTree(id, label, choices, levels, collapsed, selected, includeMode, renderSelectButtons, renderSearchBar, isJSON, clickableLabels, renderCheckbox){
     if (isJSON) {
         // Parse the JSON string
         choices = JSON.parse(choices)
@@ -120,7 +120,12 @@ function createTree(id, label, choices, levels, collapsed, selected, includeMode
     $base.append($nodeContainer)
 
     // Render and append the nodes
-    appendNodes($nodeContainer.get(0), tree, includeMode, id, clickableLabels)
+    appendNodes($nodeContainer.get(0),
+        tree,
+        includeMode,
+        id,
+        clickableLabels,
+        renderCheckbox)
 
     // Check which nodes should be selected
     preSelectNodes(id, selected, includeMode)
@@ -435,7 +440,7 @@ function parseTree(choices, levels, isJSON){
  * @param widgetId - the id of the widget
  * @param clickableLabels - a boolean value that indicates if the labels are clickable (send input to shiny)
  */
-function appendNodes(parent, tree, includeMode, widgetId, clickableLabels) {
+function appendNodes(parent, tree, includeMode, widgetId, clickableLabels, renderCheckbox) {
     let base = $(parent)
     base.append($("<ul>", {"class": styles.groupedCheckboxList, "id": "grouped-checkbox-list-base"}))
 
@@ -451,11 +456,27 @@ function appendNodes(parent, tree, includeMode, widgetId, clickableLabels) {
             for (let child of current.children) {
                 queue.push(child)
                 if (child.parent.value === "root") {
-                    child.htmlID = constructNode(child.value, null, child.has_children, base, includeMode, clickableLabels, widgetId)
+                    child.htmlID = constructNode(
+                        child.value,
+                        null,
+                        child.has_children,
+                        base, includeMode,
+                        clickableLabels,
+                        widgetId,
+                        renderCheckbox)
 
                 }
                 else {
-                    child.htmlID = constructNode(child.value, child.parent, child.has_children, base, includeMode, clickableLabels, widgetId)
+                    child.htmlID = constructNode(
+                        child.value,
+                        child.parent,
+                        child.has_children,
+                        base,
+                        includeMode,
+                        clickableLabels,
+                        widgetId,
+                        renderCheckbox
+                    )
                 }
 
             }
@@ -472,9 +493,17 @@ function appendNodes(parent, tree, includeMode, widgetId, clickableLabels) {
  * @param include
  * @param clickableLabels
  * @param widgetId
+ * @param renderCheckbox
  * @returns The ID of the node that was just created.
  */
-function constructNode(nodeName, nodeParent, hasChildren, base, include, clickableLabels, widgetId){
+function constructNode(nodeName,
+                       nodeParent,
+                       hasChildren,
+                       base,
+                       include,
+                       clickableLabels,
+                       widgetId,
+                       renderCheckbox) {
     // this function uses plain JS which increases the speed it takes to render the nodes by four times in comparison
     // with the more readable jquery
 
@@ -511,15 +540,15 @@ function constructNode(nodeName, nodeParent, hasChildren, base, include, clickab
         let charCode = match.substring(1, match.length - 1)
         nodeName = nodeName.replace(match, String.fromCodePoint(parseInt(charCode, 16)))
     }
-    // nodeName = nodeName.replace(/<e7>/g, "ç")
 
-
-    // Check if 'include' is true or false
-    if (include === true){
-        node.appendChild(generateMultiStateCheckbox(nodeName,"unchecked"))
-    } else {
-        node.appendChild(createInputCheckbox(nodeName, nNodes))
+    if (renderCheckbox === true){
+        if (include === true){
+            node.appendChild(generateMultiStateCheckbox(nodeName,"unchecked"))
+        } else {
+            node.appendChild(createInputCheckbox(nodeName, nNodes))
+        }
     }
+
     node.appendChild(createCheckboxLabel(nodeName, nNodes, clickableLabels, widgetId))
 
 
