@@ -69,7 +69,7 @@ observeEvent(input$thisisanid, {
 )
 ```
 
-###clickable_labels/links  
+### Clickable labels/links  
 *For this to work `clickable_labels` should be set to TRUE*  
 Add '_click' to the input id. Whenever a user clicks on a label the clicked label will be pushed to this input variable.
 ```r
@@ -81,7 +81,7 @@ observeEvent(input$thisisanid_click, {
 
 ### Disabled checkboxes (render_checkbox) 
 It is possible to create a clickable file type browser widget. This can be achieved by passing `render_checkbox == FALSE` in the `treecheckbox()` function.
-If combined with the `clickable_labels == TRUE` we can create clickable links which can be proccessed in Shiny. Go to the [clickable links](###clickable_labels/links) section for more information on this. 
+If combined with the `clickable_labels == TRUE` we can create clickable links which can be proccessed in Shiny. Go to the [clickable links](### Clickable labels/links) section for more information on this. 
 
 ![Disabled Checkboxes](https://raw.githubusercontent.com/NetherlandsNeurogeneticsDatabase/shinytreecheckbox/media/images/tree_checkbox_render_checkbox_example1.jpg)
 
