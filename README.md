@@ -45,6 +45,9 @@ treecheckbox(id = ns("example_treecheckbox2"),
 
 ### Using a stringified JSON object and adding a search bar.  
 The input JSON always expects that an object always has three keys; "value", "label" and "children". The children is excepted to be an array/vector/list of new objects.   
+
+Format: `{"label": "my label", "value": "my value", "children": [<child object1>, <child object2>]}`. 
+
 ```R
 treecheckbox(id = ns("select_JSON_debug"), label = "", choices = '[{"label": "eukaryotes", "value": "eukaryotes", "children": [{"label": "vertebrates", "value": "vertebrates", "children": [{"label": "mammals", "value": "mammals", "children": [{"label": "primates", "value": "primates", "children": [{"label": "humans", "value": "humans", "children": []}, {"label": "apes", "value": "apes", "children": [{"label": "chimpanzees", "value": "chimpanzees", "children": []}, {"label": "gorillas", "value": "gorillas", "children": []}, {"label": "orangutans", "value": "orangutans", "children": []}]}]}, {"label": "cats", "value": "cats", "children": [{"label": "lions", "value": "lions", "children": []}, {"label": "tigers", "value": "tigers", "children": []}]}]}, {"label": "birds", "value": "birds", "children": [{"label": "owls", "value": "owls", "children": []}, {"label": "eagles", "value": "eagles", "children": []}]}]}, {"label": "invertebrates", "value": "invertebrates", "children": [{"label": "insects", "value": "insects", "children": [{"label": "bees", "value": "bees", "children": []}, {"label": "ants", "value": "ants", "children": []}]}, {"label": "mollusks", "value": "mollusks", "children": [{"label": "snails", "value": "snails", "children": []}, {"label": "octopuses", "value": "octopuses", "children": []}]}]}]}, {"label": "prokaryotes", "value": "prokaryotes", "children": []}, {"label": "archaea", "value": "archaea", "children": []}]
 ', collapsed = TRUE, selected = FALSE, include_mode = TRUE, search_bar = TRUE, render_checkbox = TRUE, clickable_labels = TRUE)
