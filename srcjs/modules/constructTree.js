@@ -28,7 +28,7 @@ class ConstructTree {
                 let value = record[level]
                 if (!(value in nodes)) {
                     let newNode = new Node(value)
-                    currentNode.add_child(newNode)
+                    currentNode.addChild(newNode)
                     nodes[value] = newNode
                 }
                 currentNode = nodes[value]
@@ -37,22 +37,32 @@ class ConstructTree {
         this.root = root
     }
 
-    iterObject(data, parent=null){
-        for (const key of Object.keys(data)) {
-            let value = key
-            if (Array.isArray(data)){
-                value = data[key]
-            }
-            let node = new Node(value, [], parent)
-            parent.add_child(node)
-            if (typeof (data[key]) === "object") {
-                this.iterObject(data[key], node)
-            }
-        }
-    }
+
     treeFromJSON(data) {
         let root = new Node("root")
-        this.iterObject(data, root)
+        // The tree is a json which is the following format: '[{"label":"Animal","value":"Animals","children":[{"label":"Mammal","value":"Mammals","children":[{"label":"Carnivores","value":"Carnivores","children":[{"label":"Lion","value":"Lion","children":[]},{"label":"Tiger","value":"Tiger","children":[]}]},{"label":"Herbivores","value":"Herbivores","children":[{"label":"Elephant","value":"Elephant","children":[{"label":"African Elephant","value":"African Elephant","children":[]},{"label":"Asian Elephant","value":"Asian Elephant","children":[]}]},{"label":"Giraffe","value":"Giraffe","children":[]}]}]},{"label":"Bird","value":"Birds","children":[{"label":"Predators","value":"Predators","children":[{"label":"Eagle","value":"Eagle","children":[]},{"label":"Hawk","value":"Hawk","children":[]}]},{"label":"Songbirds","value":"Songbirds","children":[{"label":"Robin","value":"Robin","children":[]},{"label":"Canary","value":"Canary","children":[]}]}]}]},{"label":"Plant","value":"Plants","children":[{"label":"Flower","value":"Flowers","children":[{"label":"Rose","value":"Rose","children":[]},{"label":"Sunflower","value":"Sunflower","children":[]}]},{"label":"Tree","value":"Trees","children":[{"label":"Oak","value":"Oak","children":[]},{"label":"Pine","value":"Pine","children":[]}]}]}]'
+        // We want to convert this to a tree of nodes
+
+
+        let itterateNodes = (node, parent) => {
+            if (node.children.length > 0) {
+                node.children.forEach(child => {
+                    // We create a new node with the value of the child
+                    let newNode = new Node(child.value)
+                    // We add the new node as a child of the parent
+                    parent.addChild(newNode)
+                    // We continue itterating through the children of the child/
+                    itterateNodes(child, newNode)
+                })
+            }
+        }
+        data.forEach(node => {
+            let newNode = new Node(node.value)
+            root.addChild(newNode)
+            itterateNodes(node, newNode)
+        })
+
+
         this.root = root
     }
 
@@ -98,14 +108,14 @@ class ConstructTree {
             let keyQueue = values.slice(0, i + 1)
             let value = values[i]
             let [nodeIn, _] = this.#recursiveSearch(tree, keyQueue)
-            if (nodeIn.value !== value){
+            if (nodeIn.label !== value){
                 let newNode = new Node(value)
                 nodeIn.add_child(newNode)
             }
         }
         return(tree)
     }
-    
+
 /**
  * > The function takes a node and a list of values to find. It returns the node that matches the last
  * value in the list, and the list of values that were not found
@@ -117,7 +127,7 @@ class ConstructTree {
         let children = node.children
         for (const child of children) {
             let finding = find[0]
-            if (finding === child.value){
+            if (finding === child.label){
                 find.shift()
                 if (find.length > 0){
                     return this.#recursiveSearch(child, find)
@@ -133,11 +143,12 @@ class ConstructTree {
 
 /* A node is a value, a list of children, and a parent */
 class Node{
-    constructor(value, children, parent) {
+    constructor(label, children, parent, value=null) {
         if (!children){
             children = []
         }
-        this.value = value
+        this.label = label
+        this.value = value ? value : label
         this.children = children
         this.parent = parent
         this.depth = 0
@@ -146,11 +157,15 @@ class Node{
     /*
      * Add children to node, and register parent in child.
      */
-    add_child(child){
+    addChild(child){
         this.children.push(child)
         this.children.forEach(child => {
             child.addParent(this)
         })
+    }
+
+    addValue(value){
+        this.value = value
     }
 
     addParent(parent){
@@ -167,7 +182,7 @@ class Node{
     }
 
     findObjectByName(name){
-        if (this.value === name){
+        if (this.label === name){
             return this
         } else {
             for (const child of this.children){

@@ -6,6 +6,13 @@
   margin-right: 6px;
 }
 
+:local .groupedCheckboxCaretEmpty{
+  cursor: default;
+  user-select: none; /* Prevent text selection */
+  display: inline-block;
+  margin-right: 6px;
+  width: 13px;
+}
 :local .groupedCheckboxList{
   list-style: none; // Remove dots
 }

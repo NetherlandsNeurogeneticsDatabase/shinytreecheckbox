@@ -25,6 +25,12 @@ function createCaret() {
     return (caret)
 }
 
+function createEmptyCaret(){
+    let caret = document.createElement("span")
+    caret.classList.add(styles.groupedCheckboxCaretEmpty, "empty-caret")
+    caret.innerText = " "
+    return (caret)
+}
 
 /**
  * createInputCheckbox creates a checkbox input element
@@ -49,7 +55,7 @@ function createInputCheckbox(nodeName, nodeID) {
  * @param widgetId
  * @returns A label element
  */
-function createCheckboxLabel(nodeName, id, clickable, widgetId) {
+function createCheckboxLabel(nodeName, id, clickable, widgetId, nodeValue) {
     let labelCheckbox = document.createElement("label")
     labelCheckbox.classList.add("form-check-label")
     labelCheckbox.for = "node-input-check" + id
@@ -63,7 +69,7 @@ function createCheckboxLabel(nodeName, id, clickable, widgetId) {
         labelCheckbox.addEventListener("click", function (event) {
             event.preventDefault();
             event.stopPropagation();
-            setClickInput(widgetId, nodeName);
+            setClickInput(widgetId, nodeValue);
         })
         }
     return (labelCheckbox)
@@ -210,7 +216,6 @@ function constructSearchBar(id, $container, flattenedChoices) {
                 src.push({"label": value, "value": value})
             }
         }
-
         // Create the search bar and logic
         let searchBarElement = $searchBar[0]
         let lastClickedNode = null
@@ -273,4 +278,4 @@ function constructSearchBar(id, $container, flattenedChoices) {
 
 }
 
-export {createCaret, createInputCheckbox, createCheckboxLabel, generateSelectButtons, generateID}
+export {createCaret, createEmptyCaret, createInputCheckbox, createCheckboxLabel, generateSelectButtons, generateID}

@@ -20,7 +20,7 @@ class SearchBar {
 
     constructor(element, options = {}) {
         this.processOptions(options);
-        this.searchTrie = new Trie()
+        // this.searchTrie = new Trie()
         this.searchBar = this.AttachSearchBar(element);
         this.dropdown = this.createDropdown();
         this.attachLogic()
@@ -173,9 +173,6 @@ class SearchBar {
 
         // for each choice add a button to the dropdown
 
-        this.options.data.map((choice) => {
-            this.addChoice(choice.label, choice.value)
-        })
 
 
         return $dropdownMenu[0]

@@ -1,6 +1,6 @@
 import 'shiny';
 import {ConstructTree} from "./constructTree";
-import {createCaret, createCheckboxLabel, createInputCheckbox, generateID, generateSelectButtons} from './helpers';
+import {createCaret, createEmptyCaret, createCheckboxLabel, createInputCheckbox, generateID, generateSelectButtons} from './helpers';
 
 import {generateMultiStateCheckbox, setStateOfButton} from "./multiStateCheckbox";
 import styles from './tree.css'
@@ -161,20 +161,19 @@ function flattenDataFrame(data, levels, flattened){
     })
 }
 function flattenJSON(data, flattened){
-    // itterate over the data keys
-    for (const key of Object.keys(data)) {
-        let value = key
-        if (Array.isArray(data)){
-            value = data[key]
-        }
-        flattened.push(value)
-        if (typeof (data[key]) === "object") {
-            flattenJSON(data[key], flattened)
+    let itterateNode = function(node, flattened){
+        flattened.push(node.label)
+        if (node.children){
+            node.children.forEach(child => {
+                itterateNode(child, flattened)
+            })
         }
     }
+    data.forEach(node => {
+        itterateNode(node, flattened)
+    })
+
 }
-
-
 
 /**
  * It takes an element and an animation type, and toggles the visibility of the element's siblings
@@ -455,27 +454,39 @@ function appendNodes(parent, tree, includeMode, widgetId, clickableLabels, rende
 
             for (let child of current.children) {
                 queue.push(child)
-                if (child.parent.value === "root") {
+                let hasSiblingsWithChildren = false
+                for (let sibling of child.parent.children){
+                    if (sibling.has_children === true){
+                        hasSiblingsWithChildren = true
+                        break
+                    }
+                }
+                if (child.parent.label === "root") {
+                    // Check if the node has siblings who have children
                     child.htmlID = constructNode(
-                        child.value,
+                        child.label,
                         null,
                         child.has_children,
                         base, includeMode,
                         clickableLabels,
                         widgetId,
-                        renderCheckbox)
+                        renderCheckbox,
+                        child.value,
+                        hasSiblingsWithChildren)
 
                 }
                 else {
                     child.htmlID = constructNode(
-                        child.value,
+                        child.label,
                         child.parent,
                         child.has_children,
                         base,
                         includeMode,
                         clickableLabels,
                         widgetId,
-                        renderCheckbox
+                        renderCheckbox,
+                        child.value,
+                        hasSiblingsWithChildren
                     )
                 }
 
@@ -503,7 +514,9 @@ function constructNode(nodeName,
                        include,
                        clickableLabels,
                        widgetId,
-                       renderCheckbox) {
+                       renderCheckbox,
+                       nodeValue,
+                       hasSiblingsWithChildren) {
     // this function uses plain JS which increases the speed it takes to render the nodes by four times in comparison
     // with the more readable jquery
 
@@ -532,6 +545,12 @@ function constructNode(nodeName,
         node.appendChild(createCaret())
     }
 
+    // if has no children and siblings have children, add an empty caret
+    if (!hasChildren && hasSiblingsWithChildren){
+        node.appendChild(createEmptyCaret())
+    }
+
+
     // get a regex to check nodeName contains for example <e7> or <e8> and convert it to a unicode character
     let regex = /<e\d>/g
     let matches = nodeName.match(regex)
@@ -549,7 +568,7 @@ function constructNode(nodeName,
         }
     }
 
-    node.appendChild(createCheckboxLabel(nodeName, nNodes, clickableLabels, widgetId))
+    node.appendChild(createCheckboxLabel(nodeName, nNodes, clickableLabels, widgetId, nodeValue))
 
 
     if (hasChildren){
