@@ -16,8 +16,8 @@ treecheckbox(
   search_bar = TRUE,
   clickable_labels = FALSE,
   render_checkbox = TRUE,
-  max_height = "250px",
-  min_height = NULL,
+  max_height = "35vh",
+  min_height = "10vh",
   max_width = NULL,
   min_width = NULL
 )
@@ -27,9 +27,9 @@ treecheckbox(
 
 \item{label}{The label that will be displayed in front. If \code{NULL} is provided, no label will be generated.}
 
-\item{choices}{A dataframe which will be used to generate the checkboxes.}
+\item{choices}{A dataframe or stringified JSON which will be used to generate the checkboxes.}
 
-\item{levels}{A vector which contains the columnames that will be used to create the hierarchical data. From large to small groups.}
+\item{levels}{A vector which contains the columnames that will be used to create the hierarchical data. From highest to lowest level. Is not necessary if \code{choices} is a stringified JSON.}
 
 \item{collapsed}{Logical; If \code{TRUE} checkboxes will be collapsed on render.}
 
@@ -45,13 +45,13 @@ treecheckbox(
 
 \item{render_checkbox}{Logical; If \code{TRUE} the checkboxes will be rendered. If \code{FALSE} only the labels will be rendered.}
 
-\item{max_height}{The maximum height of the widget.}
+\item{max_height}{The maximum height of the widget can be px or vh.}
 
-\item{min_height}{The minimum height of the widget.}
+\item{min_height}{The minimum height of the widget can be px or vh.}
 
-\item{max_width}{The maximum width of the widget.}
+\item{max_width}{The maximum width of the widget can be px or vh.}
 
-\item{min_width}{The minimum width of the widget.}
+\item{min_width}{The minimum width of the widget can be px or vh.}
 }
 \description{
 Creates the checkboxes.
