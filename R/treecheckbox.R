@@ -4,8 +4,8 @@
 #'
 #' @param id The \code{input} slot that will be used to access the value.
 #' @param label The label that will be displayed in front. If \code{NULL} is provided, no label will be generated.
-#' @param choices A dataframe which will be used to generate the checkboxes.
-#' @param levels A vector which contains the columnames that will be used to create the hierarchical data. From large to small groups.
+#' @param choices A dataframe or stringified JSON which will be used to generate the checkboxes.
+#' @param levels A vector which contains the columnames that will be used to create the hierarchical data. From highest to lowest level. Is not necessary if \code{choices} is a stringified JSON.
 #' @param collapsed Logical; If \code{TRUE} checkboxes will be collapsed on render.
 #' @param selected A vector containing the values of which checkboxes will default as checked.
 #' @param include_mode Logical; If \code{TRUE} the checkboxes will be rendered with include/exclude mode.
@@ -13,6 +13,10 @@
 #' @param search_bar Logical; If \code{TRUE} a search bar will be rendered
 #' @param clickable_labels Logical; If \code{TRUE} clicking on the label will set the value of <id>_click to the label value.
 #' @param render_checkbox Logical; If \code{TRUE} the checkboxes will be rendered. If \code{FALSE} only the labels will be rendered.
+#' @param max_height The maximum height of the widget can be px or vh.
+#' @param min_height The minimum height of the widget can be px or vh.
+#' @param max_width The maximum width of the widget can be px or vh.
+#' @param min_width The minimum width of the widget can be px or vh.
 #' @examples
 #' library(shiny)
 #' library(shinytreecheckbox)
@@ -26,7 +30,7 @@
 #' @import htmlwidgets
 #' @importFrom jsonlite toJSON
 #' @export
-treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, selected = NULL, include_mode = FALSE, select_buttons = TRUE, search_bar = TRUE, clickable_labels = FALSE, render_checkbox = TRUE, width = NULL, height = NULL) {
+treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, selected = NULL, include_mode = FALSE, select_buttons = TRUE, search_bar = TRUE, clickable_labels = FALSE, render_checkbox = TRUE, max_height = "35vh", min_height = "10vh", max_width = NULL, min_width = NULL) {
   # Validate arguments first
   # validateArgs(id, label, choices, levels, collapsed, selected, width, height)
 
@@ -49,6 +53,24 @@ treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, se
       stop("levels must be a vector")
     }
 
+   # max_height, min_height must be a string or NULL
+    if (!is.null(max_height) && !is.character(max_height)) {
+        stop("max_height must be a string or NULL")
+    }
+
+    if (!is.null(min_height) && !is.character(min_height)) {
+        stop("min_height must be a string or NULL")
+    }
+
+    if (!is.null(max_width) && !is.character(max_width)) {
+        stop("max_width must be a string or NULL")
+    }
+
+    if (!is.null(min_width) && !is.character(min_width)) {
+        stop("min_width must be a string or NULL")
+    }
+
+
   collapsed <- validate_logical_or_vector(collapsed, sprintf("Argument:'collapsed' should be logical or a vector. You provided %s", typeof(collapsed)))
   selected <- validate_logical_or_vector(selected, sprintf("Argument:'selected' should be logical or a vector. You provided %s", typeof(selected)))
 
@@ -60,11 +82,15 @@ treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, se
     collapsed = collapsed,
     selected = selected,
     includeMode = include_mode,
-    select_buttons = select_buttons,
+    renderSelectButtons = select_buttons,
     search_bar = search_bar,
     isJSON = !is.data.frame(choices),
     clickableLabels = clickable_labels,
-    renderCheckbox = render_checkbox
+    renderCheckbox = render_checkbox,
+    maxHeight = max_height,
+    minHeight = min_height,
+    maxWidth = max_width,
+    minWidth = min_width
   )
 
   # create widget

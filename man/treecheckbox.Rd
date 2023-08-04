@@ -16,8 +16,10 @@ treecheckbox(
   search_bar = TRUE,
   clickable_labels = FALSE,
   render_checkbox = TRUE,
-  width = NULL,
-  height = NULL
+  max_height = "250px",
+  min_height = NULL,
+  max_width = NULL,
+  min_width = NULL
 )
 }
 \arguments{
@@ -42,6 +44,14 @@ treecheckbox(
 \item{clickable_labels}{Logical; If \code{TRUE} clicking on the label will set the value of \if{html}{\out{<id>}}_click to the label value.}
 
 \item{render_checkbox}{Logical; If \code{TRUE} the checkboxes will be rendered. If \code{FALSE} only the labels will be rendered.}
+
+\item{max_height}{The maximum height of the widget.}
+
+\item{min_height}{The minimum height of the widget.}
+
+\item{max_width}{The maximum width of the widget.}
+
+\item{min_width}{The minimum width of the widget.}
 }
 \description{
 Creates the checkboxes.
