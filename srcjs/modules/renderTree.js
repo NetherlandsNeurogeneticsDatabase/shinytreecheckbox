@@ -89,7 +89,7 @@ function createTree(params){
         selected,
         includeMode,
         renderSelectButtons,
-        renderSearchBar,
+        search_bar,
         isJSON,
         clickableLabels,
         renderCheckbox,
@@ -116,7 +116,7 @@ function createTree(params){
     }
     if (renderSelectButtons === true){
         // is hierarchical can be used to determine whether the select buttons should be rendered
-        $base.append(generateSelectButtons(id, isHierarchical, includeMode, renderSearchBar, flattenedChoices, renderCheckbox))
+        $base.append(generateSelectButtons(id, isHierarchical, includeMode, search_bar, flattenedChoices, renderCheckbox))
     }
 
     $base.data("includeMode", includeMode)
