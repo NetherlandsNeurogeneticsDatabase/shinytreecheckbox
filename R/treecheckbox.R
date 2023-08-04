@@ -50,8 +50,6 @@ treecheckbox <- function(
     min_width = NULL
     )
 {
-
-  # Validate arguments first
   # validateArgs(id, label, choices, levels, collapsed, selected, width, height)
 
   # Validate if id is a string
