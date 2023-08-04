@@ -8,15 +8,16 @@
 #' @param levels A vector which contains the columnames that will be used to create the hierarchical data. From highest to lowest level. Is not necessary if \code{choices} is a stringified JSON.
 #' @param collapsed Logical; If \code{TRUE} checkboxes will be collapsed on render.
 #' @param selected A vector containing the values of which checkboxes will default as checked.
-#' @param include_mode Logical; If \code{TRUE} the checkboxes will be rendered with include/exclude mode.
-#' @param select_buttons Logical; If \code{TRUE} helper buttons will be rendered to select all or none, collapse or expand.
-#' @param search_bar Logical; If \code{TRUE} a search bar will be rendered
-#' @param clickable_labels Logical; If \code{TRUE} clicking on the label will set the value of <id>_click to the label value.
-#' @param render_checkbox Logical; If \code{TRUE} the checkboxes will be rendered. If \code{FALSE} only the labels will be rendered.
-#' @param max_height The maximum height of the widget can be px or vh.
-#' @param min_height The minimum height of the widget can be px or vh.
-#' @param max_width The maximum width of the widget can be px or vh.
-#' @param min_width The minimum width of the widget can be px or vh.
+#' @param include_mode Logical; If \code{TRUE} the checkboxes will have an include mode.
+#' @param search_bar Logical; If \code{TRUE} a search bar will be generated.
+#' @param collapse_button Logical; If \code{TRUE} a collapse button will be generated.
+#' @param select_button Logical; If \code{TRUE} a select button will be generated.
+#' @param clickable_labels Logical; If \code{TRUE} the labels will be clickable.
+#' @param render_checkbox Logical; If \code{TRUE} the checkboxes will be rendered.
+#' @param max_height The maximum height of the widget. Must be VH or PX.
+#' @param min_height The minimum height of the widget. Must be VH or PX.
+#' @param max_width The maximum width of the widget. Must be VH or PX.
+#' @param min_width The minimum width of the widget. Must be VH or PX.
 #' @examples
 #' library(shiny)
 #' library(shinytreecheckbox)
@@ -30,7 +31,26 @@
 #' @import htmlwidgets
 #' @importFrom jsonlite toJSON
 #' @export
-treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, selected = NULL, include_mode = FALSE, select_buttons = TRUE, search_bar = TRUE, clickable_labels = FALSE, render_checkbox = TRUE, max_height = "35vh", min_height = "10vh", max_width = NULL, min_width = NULL) {
+treecheckbox <- function(
+    id,
+    label,
+    choices,
+    levels = c(),
+    collapsed = FALSE,
+    selected = NULL,
+    include_mode = FALSE,
+    search_bar = TRUE,
+    collapse_button = TRUE,
+    select_button = TRUE,
+    clickable_labels = FALSE,
+    render_checkbox = TRUE,
+    max_height = "35vh",
+    min_height = "10vh",
+    max_width = NULL,
+    min_width = NULL
+    )
+{
+
   # Validate arguments first
   # validateArgs(id, label, choices, levels, collapsed, selected, width, height)
 
@@ -82,8 +102,9 @@ treecheckbox <- function(id, label, choices, levels = c(), collapsed = FALSE, se
     collapsed = collapsed,
     selected = selected,
     includeMode = include_mode,
-    renderSelectButtons = select_buttons,
     search_bar = search_bar,
+    collapse_button = collapse_button,
+    select_button = select_button,
     isJSON = !is.data.frame(choices),
     clickableLabels = clickable_labels,
     renderCheckbox = render_checkbox,

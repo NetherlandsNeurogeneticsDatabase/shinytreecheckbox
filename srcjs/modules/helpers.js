@@ -85,16 +85,16 @@ function setClickInput(id, value){
  * checkboxes
  * @returns A div with two buttons.
  */
-function generateSelectButtons(id, isHierarchical, includeMode, searchBar, flattenedChoices, renderCheckbox) {
+function generateSelectButtons(id, searchBar, collapseButton, selectButton, flattenedChoices, renderCheckbox, includeMode) {
 
     let $container = $("<div>", {"class": "d-flex justify-content-evenly w-100"})
     let generatedID = generateID()
 
-    if (renderCheckbox === true) {
+    if (renderCheckbox === true && selectButton === true) {
         constructDropdownSelect(id, $container, generatedID, includeMode)
     }
 
-    if (isHierarchical === true) {
+    if (collapseButton === true) {
         constructDropdownCollapse(id, $container, generatedID)
     }
 

@@ -88,8 +88,9 @@ function createTree(params){
         collapsed,
         selected,
         includeMode,
-        renderSelectButtons,
         search_bar,
+        collapse_button,
+        select_button,
         isJSON,
         clickableLabels,
         renderCheckbox,
@@ -114,10 +115,15 @@ function createTree(params){
     if (label){
         $base.append("<h4>" + label + "</h4>")
     }
-    if (renderSelectButtons === true){
-        // is hierarchical can be used to determine whether the select buttons should be rendered
-        $base.append(generateSelectButtons(id, isHierarchical, includeMode, search_bar, flattenedChoices, renderCheckbox))
+
+    if (collapse_button === true && isHierarchical){
+        collapse_button = false
     }
+
+
+    // $base.append(generateSelectButtons(id, renderSelectButtons, includeMode, search_bar, flattenedChoices, renderCheckbox))
+    $base.append(generateSelectButtons(id, search_bar, collapse_button, select_button, flattenedChoices, renderCheckbox, includeMode))
+
 
     $base.data("includeMode", includeMode)
     $base.data("clickableLabels", clickableLabels)
