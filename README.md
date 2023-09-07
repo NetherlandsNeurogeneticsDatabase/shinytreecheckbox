@@ -8,6 +8,19 @@ install.packages("devtools")
 devtools::install_github("NetherlandsNeurogeneticsDatabase/shinytreecheckbox")
 ```
 
+## Requirements:
+This package needs [bslib](https://CRAN.R-project.org/package=bslib) to work properly. 
+
+```R
+custom_theme <- bs_theme(version = "5"
+                         , bootswatch = "sandstone",
+                         fg = "#0056B0", bg = "rgb(250, 249, 246)",
+                         primary = "#ffcb99", secondary = "#ffcb99")
+
+# Define UI for application that draws a histogram
+fluidPage(theme = custom_theme,
+```
+
 ## Usage
 Import the module: 
 ```R
