@@ -3,15 +3,17 @@
   cursor: pointer;
   user-select: none; /* Prevent text selection */
   display: inline-block;
-  margin-right: 6px;
+  min-width: 16px;
+  min-height: 16px;
+  fill: var(--bs-dark);
 }
 
 :local .groupedCheckboxCaretEmpty {
   cursor: default;
   user-select: none; /* Prevent text selection */
   display: inline-block;
-  margin-right: 6px;
-  width: 13px;
+  min-width: 16px;
+  min-height: 16px;
 }
 
 :local .groupedCheckboxList {

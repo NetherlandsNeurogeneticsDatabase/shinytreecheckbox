@@ -206,27 +206,40 @@ function flattenJSON(data, flattened){
 
 }
 
+function switchCaretState($caret){
+    if ($caret.hasClass("collapsed")){
+        $caret.removeClass("collapsed").addClass("expanded")
+        $caret.html('<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 320 512"><path d="M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z"/></svg>')
+    }
+
+    else if ($caret.hasClass("expanded")){
+        $caret.removeClass("expanded").addClass("collapsed")
+        $caret.html('<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 256 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M246.6 278.6c12.5-12.5 12.5-32.8 0-45.3l-128-128c-9.2-9.2-22.9-11.9-34.9-6.9s-19.8 16.6-19.8 29.6l0 256c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l128-128z"/></svg>')
+    }
+}
+
 /**
  * It takes an element and an animation type, and toggles the visibility of the element's siblings
  * @param element - the element that is clicked to hide/show
  * @param animation - "toggle" or "slide"
  */
 function hideListElement(element, animation="toggle"){
+    let caret = $(element)
+
     const animations = {"toggle": {"show": "show", "hide": "hide"}, "slide": {"show": "slideDown", "hide": "slideUp"}}
 
-    let caret = $(element)
     if (!(animation in animations)){
         throw new Error("The animation type is not supported.")
 
     }
 
-    if (caret.text() === "▼") {
-        caret.removeClass("expanded").addClass("collapsed")
-        caret.text("▶")
+    switchCaretState(caret)
+
+    if (caret.hasClass("collapsed")){
         caret.siblings("." + styles.groupedCheckboxList)[animations[animation]["hide"]]()
-    } else {
-        caret.removeClass("collapsed").addClass("expanded")
-        caret.text("▼")
+    }
+
+    else if (caret.hasClass("expanded")){
         caret.siblings("." + styles.groupedCheckboxList)[animations[animation]["show"]]()
     }
 }
@@ -356,6 +369,7 @@ function registerEvents(id){
 
     // Hide if caret is clicked
     $base.find("." + styles.groupedCheckboxCaret).on("click", function (){
+        console.log("Caret clicked")
         hideListElement(this, "toggle")
     })
 
@@ -393,26 +407,55 @@ function registerEvents(id){
     $base.find(".grouped-checkbox-expand-all").on("click", function(){
         $base.find("." + styles.groupedCheckboxCaret).each(function(){
             let $caret = $(this)
-            if ($caret.text() === "▶") {
-                $caret.text("▼")
+            // We rotate the caret 90 degrees to the right when it is collapsed. We dont change the text only use pure css
+            // check if the caret has the class "collapsed" and if so, expand it
+            if ($caret.hasClass("collapsed")){
+                $caret.removeClass("collapsed").addClass("expanded")
+                // Add the transform: rotate(90deg) to the caret
+                $caret.css("transform", "rotate(90deg)")
                 $caret.siblings("." + styles.groupedCheckboxList).show()
-                $caret.addClass("expanded").removeClass("collapsed")
             }
         })
     })
+
+    // $base.find(".grouped-checkbox-expand-all").on("click", function(){
+    //     $base.find("." + styles.groupedCheckboxCaret).each(function(){
+    //         let $caret = $(this)
+    //         if ($caret.text() === "▶") {
+    //             $caret.text("▼")
+    //             $caret.siblings("." + styles.groupedCheckboxList).show()
+    //             $caret.addClass("expanded").removeClass("collapsed")
+    //         }
+    //     })
+    // })
 
 
     // Collapse all button
     $base.find(".grouped-checkbox-collapse-all").on("click", function(){
         $base.find("." + styles.groupedCheckboxCaret).each(function(){
+            // if the class has the class "expanded" then collapse it
             let $caret = $(this)
-            if ($caret.text() === "▼") {
-                $caret.text("▶")
-                $caret.addClass("collapsed").removeClass("expanded")
+            // We rotate the caret 90 degrees to the right when it is collapsed. We dont change the text only use pure css
+            // check if the caret has the class "expanded" and if so, collapse it
+            if ($caret.hasClass("expanded")){
+                $caret.removeClass("expanded").addClass("collapsed")
+                // Add the transform: rotate(90deg) to the caret
+                $caret.css("transform", "rotate(90deg)")
                 $caret.siblings("." + styles.groupedCheckboxList).hide()
             }
         })
     })
+
+    // $base.find(".grouped-checkbox-collapse-all").on("click", function(){
+    //     $base.find("." + styles.groupedCheckboxCaret).each(function(){
+    //         let $caret = $(this)
+    //         if ($caret.text() === "▼") {
+    //             $caret.text("▶")
+    //             $caret.addClass("collapsed").removeClass("expanded")
+    //             $caret.siblings("." + styles.groupedCheckboxList).hide()
+    //         }
+    //     })
+    // })
 
     // Include all
     $base.find(".grouped-checkbox-include-all").on("click", function(){
